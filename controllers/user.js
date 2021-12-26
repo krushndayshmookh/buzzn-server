@@ -1,6 +1,8 @@
 const User = require('../models/user').model
 
-exports.list_get = (req, res) => {
+const supabase = require('../supabase')
+
+exports.list_get = async (req, res) => {
   const { type } = req.query
 
   let query = {}
@@ -9,16 +11,14 @@ exports.list_get = (req, res) => {
     query.type = type
   }
 
-  User.find(query)
-    .select('-password')
-    .lean()
-    .then(doc => {
-      return res.send(doc)
-    })
-    .catch(err => {
-      console.error({ err })
-      return res.status(500).send({ err })
-    })
+  try {
+    const { data, error } = await supabase.from('profiles').select('*')
+    if (error) throw error
+    return res.send(data)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
 }
 
 exports.details_get = (req, res) => {
