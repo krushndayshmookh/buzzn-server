@@ -6,7 +6,15 @@ const userController = require('../controllers/user')
 
 // Controllers -----
 
+router.get(
+  '/by-username/:username',
+  validateToken,
+  userController.byUsername_get
+)
+
 router.get('/:userId', validateToken, userController.details_get)
+
+router.get('/:userId/instrument', userController.user_instrument_get)
 
 router.get('/:userId/followers', userController.followers_get)
 
@@ -28,9 +36,11 @@ router.get('/', validateToken, userController.list_get)
 
 router.post('/', validateToken, userController.create_post)
 
+router.put('/', validateToken, userController.update_put)
+
 router.delete('/:userId', validateToken, userController.delete_delete)
 
-router.get('/', (req, res) => {
+router.get('*', (req, res) => {
   res.send('Please read documentation for the API. (user)')
 })
 

@@ -34,7 +34,7 @@ router.delete(
   postController.bookmark_delete
 )
 
-router.get('/', (req, res) => {
+router.get('*', (req, res) => {
   res.send('Please read documentation for the API. (user)')
 })
 

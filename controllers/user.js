@@ -1,4 +1,4 @@
-const { User, Follower } = require('../models')
+const { User, Follower, Instrument } = require('../models')
 
 exports.list_get = async (req, res) => {
   const { type } = req.query
@@ -13,6 +13,23 @@ exports.list_get = async (req, res) => {
     let users = await User.find(query).lean()
 
     return res.send(users)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.byUsername_get = async (req, res) => {
+  const { username } = req.params
+
+  let query = {
+    username,
+  }
+
+  try {
+    let user = await User.findOne(query).select('-password').lean()
+
+    return res.send(user)
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
@@ -56,6 +73,35 @@ exports.create_post = async (req, res) => {
   }
 }
 
+exports.update_put = async (req, res) => {
+  const { user } = req.decoded
+
+  const { username, email, firstName, lastName, website, avatar_url } = req.body
+
+  let updates = {
+    username,
+    email,
+    firstName,
+    lastName,
+    website,
+    avatar_url,
+  }
+
+  try {
+    await User.updateOne(
+      {
+        _id: user._id,
+      },
+      updates
+    )
+
+    res.send({ success: true })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
 exports.delete_delete = async (req, res) => {
   res.send({ success: true })
   // const { userId } = req.params
@@ -73,7 +119,6 @@ exports.delete_delete = async (req, res) => {
   //   return res.status(500).send({ err })
   // }
 }
-
 
 exports.followers_get = async (req, res) => {
   let { userId } = req.params
@@ -185,6 +230,23 @@ exports.follower_delete = async (req, res) => {
     await follower.remove()
 
     return res.send({ success: true })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.user_instrument_get = async (req, res) => {
+  const { userId } = req.params
+
+  let query = {
+    user: userId,
+  }
+
+  try {
+    let instrument = await Instrument.findOne(query).lean()
+
+    return res.send(instrument)
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
