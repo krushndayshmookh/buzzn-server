@@ -1,13 +1,21 @@
+require('dotenv').config()
+
 const express = require('express')
+
 const mongoose = require('mongoose')
+const mongoosePaginate = require('mongoose-paginate')
+const mongooseLeanVirtuals = require('mongoose-lean-virtuals')
+
 const cors = require('cors')
+
 const logger = require('morgan')
+
 // const multer = require('multer')
 // const path = require('path')
-const http = require('http')
-// const socketIO = require('socket.io')
 
-require('dotenv').config()
+const http = require('http')
+
+// const socketIO = require('socket.io')
 
 const PORT = process.env.PORT || 3000
 const MONGODB_URI = process.env.MONGODB_URI
@@ -21,12 +29,14 @@ const server = http.createServer(app)
 // const io = socketIO(server)
 
 // global.io = io
+mongoose.plugin(mongoosePaginate)
+mongoose.plugin(mongooseLeanVirtuals)
 
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
-  useCreateIndex: true
+  useCreateIndex: true,
 })
 mongoose.Promise = global.Promise
 
@@ -42,12 +52,12 @@ app.use(cors())
 app.use(
   express.urlencoded({
     extended: true,
-    limit: '50mb'
+    limit: '50mb',
   })
 )
 app.use(
   express.json({
-    limit: '50mb'
+    limit: '50mb',
   })
 )
 
