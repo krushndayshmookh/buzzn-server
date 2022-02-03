@@ -6,14 +6,12 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "lt": "lt --port 3000 --subdomain buzzn",
     "lint": "eslint . ; exit 0"
   },
   "author": "Krushn Dayshmookh <krushndayshmookh@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "@sendgrid/mail": "^7.2.3",
-    "@supabase/supabase-js": "^1.29.1",
     "chalk": "^4.1.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
@@ -31,7 +29,6 @@
   },
   "devDependencies": {
     "eslint": "^7.6.0",
-    "localtunnel": "^2.0.2",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.4"
   }
