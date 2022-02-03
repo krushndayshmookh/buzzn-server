@@ -1,6 +1,4 @@
-const User = require('../models/user').model
-
-const supabase = require('../supabase')
+const { User, Follower } = require('../models')
 
 exports.list_get = async (req, res) => {
   const { type } = req.query
@@ -12,68 +10,66 @@ exports.list_get = async (req, res) => {
   }
 
   try {
-    const { data, error } = await supabase.from('profiles').select('*')
-    if (error) throw error
-    return res.send(data)
+    let users = await User.find(query).lean()
+
+    return res.send(users)
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
   }
 }
 
-exports.details_get = (req, res) => {
-  const { userid } = req.params
+exports.details_get = async (req, res) => {
+  const { userId } = req.params
 
   let query = {
-    _id: userid
+    _id: userId,
   }
 
-  User.findOne(query)
-    .select('-password')
-    .lean()
-    .then(doc => {
-      return res.send(doc)
-    })
-    .catch(err => {
-      console.error({ err })
-      return res.status(500).send({ err })
-    })
+  try {
+    let user = await User.findOne(query).select('-password').lean()
+
+    return res.send(user)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
 }
 
-exports.create_post = (req, res) => {
+exports.create_post = async (req, res) => {
   const { name, email, password, type } = req.body
 
   let newUser = new User({
     name,
     email,
     password,
-    type
+    type,
   })
 
-  newUser
-    .save()
-    .then(doc => {
-      return res.send(doc)
-    })
-    .catch(err => {
-      console.error({ err })
-      return res.status(500).send({ err })
-    })
+  try {
+    await newUser.save()
+
+    return res.send(newUser)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
 }
 
 exports.delete_delete = async (req, res) => {
-  const { userid } = req.params
+  res.send({ success: true })
+  // const { userId } = req.params
 
-  let query = {
-    _id: userid
-  }
+  // let query = {
+  //   _id: userId,
+  // }
 
-  User.deleteOne(query)
-    .then(doc => {
-      return res.send(doc)
-    })
-    .catch(err => {
-      console.error({ err })
-      return res.status(500).send({ err })
-    })
+  // try {
+  //   await User.deleteOne(query)
+
+  //   res.send({ success: true })
+  // } catch (err) {
+  //   console.error({ err })
+  //   return res.status(500).send({ err })
+  // }
 }
