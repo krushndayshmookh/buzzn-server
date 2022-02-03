@@ -1,52 +1,90 @@
-const supabase = require('../supabase')
+const { Post, Instrument, BlockDelta, Like, Bookmark } = require('../models')
 
-exports.create_post = async (req, res) => {
-  const { record } = req.body
+const BLOCK_COUNTS = require('../configs/PostTypeBlockCounts')
 
-  const blockCount = {
-    text: 20,
-    image: 50,
-  }[record.type]
+exports.fetch_get = async (req, res) => {
+  const { page, limit } = req.query
+  const { type } = req.query
+
+  let query = {}
+
+  if (type) {
+    query.type = type
+  }
 
   try {
-    const { data: instrument } = await supabase
-      .from('instruments')
-      .select('*')
-      .eq('id', record.user_id)
-      .single()
-
-    let update = {}
-
-    if (!instrument) {
-      update = {
-        id: record.user_id,
-        minted: blockCount,
-      }
-    } else {
-      update = {
-        id: record.user_id,
-        minted: instrument.minted + blockCount,
-      }
-    }
-
-    const { data: updated } = await supabase.from('instruments').upsert(
-      update,
-      {
-        returning: 'minimal',
-      }
-    )
-
-    await supabase.from('block_delta').insert({
-      user_id: record.user_id,
-      instrument_id: record.user_id,
-      type: 'mint',
-      data: {
-        post_id: record.id,
+    const posts = await Post.paginate(query, {
+      page: parseInt(page, 10) || 1,
+      limit: parseInt(limit) || 10,
+      sort: {
+        createdAt: -1,
       },
-      quantity: blockCount,
+      populate: [
+        {
+          path: 'user',
+          select: 'username avatar',
+        },
+      ],
+    })
+    return res.send(posts)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.create_post = async (req, res) => {
+  const { type, text, image_url, caption } = req.body
+  const { user } = req.decoded
+
+  const blockCount = BLOCK_COUNTS[type]
+
+  try {
+    const newPost = new Post({
+      user: user._id,
+      type,
+      text,
+      content: {
+        text: {
+          content: text,
+          color: '#BBD686',
+        },
+
+        image: {
+          content: image_url,
+          caption: caption,
+        },
+      },
     })
 
-    return res.status(201).send(updated)
+    await newPost.save()
+
+    let instrument = await Instrument.findOne({ user: user._id })
+
+    if (instrument) {
+      instrument.minted += blockCount
+    } else {
+      instrument = new Instrument({
+        user: user._id,
+        minted: blockCount,
+        symbol: 'BLOCK-' + user.username,
+      })
+    }
+    await instrument.save()
+
+    const blockDelta = new BlockDelta({
+      user: user._id,
+      instrument: instrument._id,
+      type: 'mint',
+      quantity: blockCount,
+      data: {
+        post: newPost._id,
+      },
+    })
+
+    await blockDelta.save()
+
+    return res.status(201).send({ success: true })
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
