@@ -90,3 +90,188 @@ exports.create_post = async (req, res) => {
     return res.status(500).send({ err })
   }
 }
+
+exports.like_put = async (req, res) => {
+  const { postId } = req.params
+  const { user } = req.decoded
+
+  try {
+    const post = await Post.findById(postId)
+
+    if (!post) {
+      return res.status(404).send({
+        error: 'Post not found',
+      })
+    }
+
+    const like = await Like.findOne({
+      user: user._id,
+      post: postId,
+    })
+
+    if (like) {
+      return res.status(400).send({
+        error: 'You have already liked this post',
+      })
+    }
+
+    const newLike = new Like({
+      user: user._id,
+      post: postId,
+    })
+
+    await newLike.save()
+
+    res.send({
+      success: true,
+    })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.likesCount_get = async (req, res) => {
+  const { postId } = req.params
+
+  try {
+    const likesCount = await Like.countDocuments({
+      post: postId,
+    })
+
+    return res.send({ likesCount })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.hasLiked_get = async (req, res) => {
+  const { user } = req.decoded
+  const { postId } = req.params
+
+  try {
+    const userLike = await Like.findOne({
+      post: postId,
+      user: user._id,
+    })
+
+    const hasLiked = !!userLike
+    return res.send({ hasLiked })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.like_delete = async (req, res) => {
+  const { postId } = req.params
+  const { user } = req.decoded
+
+  try {
+    const like = await Like.findOne({
+      user: user._id,
+      post: postId,
+    })
+
+    if (!like) {
+      return res.status(404).send({
+        error: 'Like not found',
+      })
+    }
+
+    await like.remove()
+
+    return res.send({
+      success: true,
+    })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.bookmark_put = async (req, res) => {
+  const { postId } = req.params
+  const { user } = req.decoded
+
+  try {
+    const post = await Post.findById(postId)
+
+    if (!post) {
+      return res.status(404).send({
+        error: 'Post not found',
+      })
+    }
+
+    const bookmark = await Bookmark.findOne({
+      user: user._id,
+      post: postId,
+    })
+
+    if (bookmark) {
+      return res.status(400).send({
+        error: 'You have already bookmarked this post',
+      })
+    }
+
+    const newBookmark = new Bookmark({
+      user: user._id,
+      post: postId,
+    })
+
+    await newBookmark.save()
+
+    res.send({
+      success: true,
+    })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.hasBookmarked_get = async (req, res) => {
+  const { user } = req.decoded
+  const { postId } = req.params
+
+  try {
+    const userBookmark = await Bookmark.findOne({
+      post: postId,
+      user: user._id,
+    })
+
+    const hasBookmarked = !!userBookmark
+    return res.send({ hasBookmarked })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.bookmark_delete = async (req, res) => {
+  const { postId } = req.params
+  const { user } = req.decoded
+
+  try {
+    const bookmark = await Bookmark.findOne({
+      user: user._id,
+      post: postId,
+    })
+
+    if (!bookmark) {
+      return res.status(404).send({
+        error: 'Bookmark not found',
+      })
+    }
+
+    await bookmark.remove()
+
+    return res.send({
+      success: true,
+    })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
