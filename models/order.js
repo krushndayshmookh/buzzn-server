@@ -31,15 +31,16 @@ const OrderSchema = new Schema(
     status: {
       type: String,
       enum: ['pending', 'executed', 'cancelled'],
+      default: 'pending',
     },
     type: {
       type: String,
       enum: ['market', 'limit'],
     },
-    transactions: [
+    trades: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'Transaction',
+        ref: 'Trades',
       },
     ],
   },
@@ -54,15 +55,28 @@ const OrderSchema = new Schema(
   }
 )
 
-
-OrderSchema.virtual('averagePrice').get(function() {
-  if (this.transactions.length === 0) {
+OrderSchema.virtual('averagePrice').get(function () {
+  if (!this.transactions || this.transactions.length === 0) {
     return 0
   }
   const totalPrice = this.transactions.reduce((total, transaction) => {
     return total + transaction.price * transaction.quantity
   }, 0)
   return totalPrice / this.transactions.length
+})
+
+OrderSchema.virtual('matchedQuantity').get(function () {
+  if (!this.transactions || this.transactions.length === 0) {
+    return 0
+  }
+  const qty = this.transactions.reduce((total, transaction) => {
+    return total + transaction.quantity
+  }, 0)
+  return qty
+})
+
+OrderSchema.virtual('unmatchedQuantity').get(function () {
+  return this.quantity - this.matchedQuantity
 })
 
 OrderSchema.plugin(mongoosePaginate)

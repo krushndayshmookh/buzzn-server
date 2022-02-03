@@ -9,10 +9,17 @@ exports.holdings_get = async (req, res) => {
     user: user._id,
   }
 
+  let populate = [
+    {
+      path: 'instrument',
+      select: 'symbol',
+    },
+  ]
+
   if (instrument) query.instrument = instrument
 
   try {
-    let holdings = await Holding.find(query).lean()
+    let holdings = await Holding.find(query).populate(populate).lean()
 
     res.send(holdings)
   } catch (err) {
