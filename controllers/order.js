@@ -105,3 +105,41 @@ exports.placeOrder_post = async (req, res) => {
     return res.status(500).send({ err })
   }
 }
+
+exports.cancelOrder_delete = async (req, res) => {
+  const { user } = req.decoded
+  const { orderId } = req.params
+
+  try {
+    let order = await Order.findById(orderId)
+
+    if (!order) {
+      return res.status(404).send('Order not found')
+    }
+
+    if (order.user != user._id) {
+      return res.status(403).send('Access denied')
+    }
+
+    if (order.status == 'pending') {
+      order.status = 'cancelled'
+      await order.save()
+
+      if (order.transactionType == 'sell') {
+        let holding = await Holding.findOne({
+          instrument: order.instrument,
+          user: user._id,
+        })
+
+        holding.quantity += order.unmatchedQuantity
+        await holding.save()
+      }
+      return res.send({ success: true })
+    }
+
+    return res.status(400).send('Order is already executed')
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
