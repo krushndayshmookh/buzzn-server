@@ -12,7 +12,7 @@ exports.holdings_get = async (req, res) => {
   let populate = [
     {
       path: 'instrument',
-      select: 'symbol',
+      select: 'symbol ltp',
     },
   ]
 
