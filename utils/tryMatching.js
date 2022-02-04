@@ -58,9 +58,9 @@ module.exports = async newOrder => {
         $lte: newOrder.price,
       },
       user: {
-        $ne: newOrder.user
-      }
-    }).sort({ createdAt: 1 })
+        $ne: newOrder.user,
+      },
+    }).sort({ price: -1, createdAt: 1 })
 
     for (let candidateOrder of matchingOrders) {
       let qtyPending = newOrder.quantity - qtyMatched
@@ -111,9 +111,9 @@ module.exports = async newOrder => {
         $gte: newOrder.price,
       },
       user: {
-        $ne: newOrder.user
-      }
-    }).sort({ createdAt: 1 })
+        $ne: newOrder.user,
+      },
+    }).sort({ price: -1, createdAt: 1 })
 
     for (let candidateOrder of matchingOrders) {
       let qtyPending = newOrder.quantity - qtyMatched
