@@ -38,6 +38,7 @@ module.exports = async newOrder => {
 
         instrument.fresh -= newTrade.quantity
         instrument.floating += newTrade.quantity
+        instrument.delta = newOrder.price - instrument.ltp
         instrument.ltp = newOrder.price
         await instrument.save()
       }
@@ -91,6 +92,7 @@ module.exports = async newOrder => {
       await candidateOrder.save()
       await holding.save()
 
+      instrument.delta = newOrder.price - instrument.ltp
       instrument.ltp = newOrder.price
       await instrument.save()
 
@@ -156,6 +158,7 @@ module.exports = async newOrder => {
       await candidateHolding.save()
       await candidateOrder.save()
 
+      instrument.delta = newOrder.price - instrument.ltp
       instrument.ltp = newOrder.price
       await instrument.save()
 
