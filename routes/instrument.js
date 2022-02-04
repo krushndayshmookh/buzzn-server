@@ -12,6 +12,18 @@ router.post('/float', validateToken, instrumentController.blocks_float_post)
 
 router.get('/:instrumentId', validateToken, instrumentController.instrument_get)
 
+router.get(
+  '/:instrumentId/market-depth',
+  validateToken,
+  instrumentController.market_depth_get
+)
+
+router.get(
+  '/:instrumentId/chart',
+  validateToken,
+  instrumentController.chart_get
+)
+
 router.get('*', (req, res) => {
   res.send('Please read documentation for the API. (instrument)')
 })
