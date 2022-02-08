@@ -18,7 +18,7 @@ module.exports = async newOrder => {
 
   if (newOrder.transactionType == 'buy') {
     if (instrument.fresh) {
-      if (newOrder.price > instrument.ltp) {
+      if (newOrder.price >= instrument.ltp) {
         let newTrade = new Trade({
           buyer: newOrder.user,
           seller: instrument.user,
