@@ -1,4 +1,5 @@
-const { User, Follower, Instrument } = require('../models')
+const { User, Follower, Instrument, Watchlist } = require('../models')
+const nameSort = require('../utils/nameSort')
 
 exports.list_get = async (req, res) => {
   const { type } = req.query
@@ -247,6 +248,83 @@ exports.user_instrument_get = async (req, res) => {
     let instrument = await Instrument.findOne(query).lean()
 
     return res.send(instrument)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.user_watchlist_post = async (req, res) => {
+  const { user } = req.decoded
+  const { instrument } = req.body
+
+  let userInstrument = new Watchlist({
+    user: user._id,
+    instrument,
+  })
+
+  try {
+    await userInstrument.save()
+
+    return res.send(userInstrument)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.user_watchlist_get = async (req, res) => {
+  const { user } = req.decoded
+
+  let query = {
+    user: user._id,
+  }
+
+  let populate = [{ path: 'instrument' }]
+
+  try {
+    let userInstruments = await Watchlist.find(query).populate(populate).lean()
+    let instruments = userInstruments.map(i => i.instrument).sort(nameSort)
+
+    return res.send(instruments)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.user_isWatching_get = async (req, res) => {
+  let { user } = req.decoded
+  const { instrument } = req.query
+
+  try {
+    let result = await Watchlist.findOne({
+      user: user._id,
+      instrument: instrument,
+    })
+
+    let isWatching = !!result
+
+    return res.send({ isWatching })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.user_watchlist_delete = async (req, res) => {
+  const { user } = req.decoded
+  const { instrumentId } = req.params
+
+  let query = {
+    user: user._id,
+    instrument: instrumentId,
+  }
+
+  try {
+    let result = await Watchlist.deleteOne(query)
+
+    return res.send(result)
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
