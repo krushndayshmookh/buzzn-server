@@ -8,6 +8,10 @@ router.post('/', validateToken, postController.create_post)
 
 router.get('/', postController.fetch_get)
 
+router.post('/:postId/comments', validateToken, postController.comments_post)
+
+router.get('/:postId/comments', validateToken, postController.comments_get)
+
 router.put('/:postId/likes', validateToken, postController.like_put)
 
 router.get('/:postId/likes/count', postController.likesCount_get)

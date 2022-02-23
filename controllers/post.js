@@ -1,4 +1,11 @@
-const { Post, Instrument, BlockDelta, Like, Bookmark } = require('../models')
+const {
+  Post,
+  Instrument,
+  BlockDelta,
+  Like,
+  Bookmark,
+  Comment,
+} = require('../models')
 
 const BLOCK_COUNTS = require('../configs/PostTypeBlockCounts')
 
@@ -270,6 +277,69 @@ exports.bookmark_delete = async (req, res) => {
     return res.send({
       success: true,
     })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.comments_post = async (req, res) => {
+  const { postId } = req.params
+  const { user } = req.decoded
+  const { comment } = req.body
+
+  try {
+    const post = await Post.findById(postId)
+
+    if (!post) {
+      return res.status(404).send({
+        error: 'Post not found',
+      })
+    }
+
+    const newComment = new Comment({
+      user: user._id,
+      post: postId,
+      content: comment,
+    })
+
+    await newComment.save()
+
+    res.send({
+      success: true,
+    })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.comments_get = async (req, res) => {
+  const { postId } = req.params
+
+  try {
+    const post = await Post.findById(postId)
+
+    if (!post) {
+      return res.status(404).send({
+        error: 'Post not found',
+      })
+    }
+
+    let populate = [
+      {
+        path: 'user',
+        select: 'username avatar',
+      },
+    ]
+
+    let comments = await Comment.find({
+      post: postId,
+    })
+      .populate(populate)
+      .sort({ createdAt: -1 })
+
+    res.send(comments)
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
