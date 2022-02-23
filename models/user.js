@@ -67,14 +67,14 @@ const UserSchema = new Schema(
 )
 
 UserSchema.virtual('followersCount', {
-  ref: 'Followers',
+  ref: 'Follower',
   localField: '_id',
   foreignField: 'user',
   count: true,
 })
 
 UserSchema.virtual('followingCount', {
-  ref: 'Followers',
+  ref: 'Follower',
   localField: '_id',
   foreignField: 'follower',
   count: true,

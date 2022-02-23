@@ -29,8 +29,9 @@ exports.byUsername_get = async (req, res) => {
 
   try {
     let user = await User.findOne(query)
-      .select('-password')
-      // .lean({ virtuals: true })
+      .select('username firstName lastName avatar categories')
+      .populate('followersCount followingCount')
+    // .lean({ virtuals: true })
 
     return res.send(user)
   } catch (err) {
