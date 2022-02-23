@@ -10,8 +10,7 @@ const {
 const BLOCK_COUNTS = require('../configs/PostTypeBlockCounts')
 
 exports.fetch_get = async (req, res) => {
-  const { page, limit } = req.query
-  const { type } = req.query
+  const { page, limit, user, type } = req.query
 
   let query = {}
 
@@ -19,20 +18,34 @@ exports.fetch_get = async (req, res) => {
     query.type = type
   }
 
+  if (user) {
+    query.user = user
+  }
+
+  let sort = {
+    createdAt: -1,
+  }
+
+  let populate = [
+    {
+      path: 'user',
+      select: 'username avatar',
+    },
+  ]
+
   try {
-    const posts = await Post.paginate(query, {
-      page: parseInt(page, 10) || 1,
-      limit: parseInt(limit) || 10,
-      sort: {
-        createdAt: -1,
-      },
-      populate: [
-        {
-          path: 'user',
-          select: 'username avatar',
-        },
-      ],
-    })
+    let posts = []
+
+    if (page && limit) {
+      posts = await Post.paginate(query, {
+        page: parseInt(page) || 1,
+        limit: parseInt(limit) || 100,
+        sort,
+        populate,
+      })
+    } else {
+      posts = await Post.find(query).sort(sort).populate(populate)
+    }
     return res.send(posts)
   } catch (err) {
     console.error({ err })
