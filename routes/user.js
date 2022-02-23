@@ -30,6 +30,8 @@ router.get('/:userId/instrument', userController.user_instrument_get)
 
 router.get('/:userId/followers', userController.followers_get)
 
+router.get('/:userId/following', userController.following_get)
+
 router.get(
   '/:userId/followers/isFollowing',
   validateToken,

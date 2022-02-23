@@ -66,6 +66,20 @@ const UserSchema = new Schema(
   }
 )
 
+UserSchema.virtual('followersCount', {
+  ref: 'Followers',
+  localField: '_id',
+  foreignField: 'user',
+  count: true,
+})
+
+UserSchema.virtual('followingCount', {
+  ref: 'Followers',
+  localField: '_id',
+  foreignField: 'follower',
+  count: true,
+})
+
 UserSchema.plugin(mongoosePaginate)
 
 const UserModel = mongoose.model('User', UserSchema)

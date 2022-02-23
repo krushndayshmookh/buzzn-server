@@ -28,7 +28,9 @@ exports.byUsername_get = async (req, res) => {
   }
 
   try {
-    let user = await User.findOne(query).select('-password').lean()
+    let user = await User.findOne(query)
+      .select('-password')
+      // .lean({ virtuals: true })
 
     return res.send(user)
   } catch (err) {
@@ -145,6 +147,36 @@ exports.followers_get = async (req, res) => {
     let followers = result.map(f => f.follower)
 
     return res.send(followers)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.following_get = async (req, res) => {
+  let { userId } = req.params
+
+  let query = {
+    follower: userId,
+  }
+
+  let populate = [
+    {
+      path: 'user',
+      select: 'username avatar',
+    },
+  ]
+
+  let sort = {
+    'user.username': 1,
+  }
+
+  try {
+    let result = await Follower.find(query).populate(populate).sort(sort).lean()
+
+    let following = result.map(f => f.user)
+
+    return res.send(following)
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
