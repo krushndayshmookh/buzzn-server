@@ -125,24 +125,32 @@ exports.delete_delete = async (req, res) => {
 }
 
 exports.followers_get = async (req, res) => {
-  let { userId } = req.params
-
-  let query = {
-    user: userId,
-  }
-
-  let populate = [
-    {
-      path: 'follower',
-      select: 'username avatar',
-    },
-  ]
-
-  let sort = {
-    'follower.username': 1,
-  }
+  let { username } = req.params
 
   try {
+    let user = await User.findOne({ username })
+
+    if (!user) {
+      return res.status(404).send({
+        error: 'User not found',
+      })
+    }
+
+    let query = {
+      user: user._id,
+    }
+
+    let populate = [
+      {
+        path: 'follower',
+        select: 'username avatar',
+      },
+    ]
+
+    let sort = {
+      'follower.username': 1,
+    }
+
     let result = await Follower.find(query).populate(populate).sort(sort).lean()
 
     let followers = result.map(f => f.follower)
@@ -155,24 +163,32 @@ exports.followers_get = async (req, res) => {
 }
 
 exports.following_get = async (req, res) => {
-  let { userId } = req.params
-
-  let query = {
-    follower: userId,
-  }
-
-  let populate = [
-    {
-      path: 'user',
-      select: 'username avatar',
-    },
-  ]
-
-  let sort = {
-    'user.username': 1,
-  }
+  let { username } = req.params
 
   try {
+    let user = await User.findOne({ username })
+
+    if (!user) {
+      return res.status(404).send({
+        error: 'User not found',
+      })
+    }
+
+    let query = {
+      follower: user._id,
+    }
+
+    let populate = [
+      {
+        path: 'user',
+        select: 'username avatar',
+      },
+    ]
+
+    let sort = {
+      'user.username': 1,
+    }
+
     let result = await Follower.find(query).populate(populate).sort(sort).lean()
 
     let following = result.map(f => f.user)
