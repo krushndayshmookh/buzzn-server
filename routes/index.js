@@ -7,6 +7,7 @@ router.use('/api/posts', require('./post'))
 router.use('/api/holdings', require('./holding'))
 router.use('/api/instruments', require('./instrument'))
 router.use('/api/orders', require('./order'))
+router.use('/api/bookmarks', require('./bookmark'))
 
 router.get('/api', (req, res) => {
   res.send('Please read documentation for the API.')
