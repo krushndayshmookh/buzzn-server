@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 
-const User = require('../models/user').model
+const { User, Instrument } = require('../models')
 
 exports.login_post = async (req, res) => {
   const { email, password } = req.body
@@ -44,8 +44,15 @@ exports.register_post = async (req, res) => {
     password,
   })
 
+  let newInstrument = new Instrument({
+    user: newUser._id,
+    minted: 0,
+    symbol: 'BLOCK-' + username,
+  })
+
   try {
     await newUser.save()
+    await newInstrument.save()
     return res.status(201).send({ success: true })
   } catch (err) {
     if (err.code === 11000) {
