@@ -54,6 +54,10 @@ const UserSchema = new Schema(
         ref: 'UserCategory',
       },
     ],
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: {

@@ -10,8 +10,21 @@ exports.list_get = async (req, res) => {
     query.type = type
   }
 
+  let select = 'avatar username firstName lastName isVerified'
+
+  let populate = ''
+
+  let sort = {
+    username: 1,
+  }
+
   try {
-    let users = await User.find(query).lean()
+    let users = await User.find(query)
+      .select(select)
+      .collation({ locale: 'en' })
+      .sort(sort)
+      .populate(populate)
+      .lean()
 
     return res.send(users)
   } catch (err) {
@@ -29,7 +42,7 @@ exports.byUsername_get = async (req, res) => {
 
   try {
     let user = await User.findOne(query)
-      .select('username firstName lastName avatar categories')
+      .select('username firstName lastName avatar categories isVerified')
       .populate('followersCount followingCount')
     // .lean({ virtuals: true })
 
@@ -48,7 +61,7 @@ exports.details_get = async (req, res) => {
   }
 
   try {
-    let user = await User.findOne(query).select('-password').lean()
+    let user = await User.findOne(query).select('username isVerified').lean()
 
     return res.send(user)
   } catch (err) {
@@ -143,7 +156,7 @@ exports.followers_get = async (req, res) => {
     let populate = [
       {
         path: 'follower',
-        select: 'username avatar',
+        select: 'username avatar isVerified',
       },
     ]
 
@@ -181,7 +194,7 @@ exports.following_get = async (req, res) => {
     let populate = [
       {
         path: 'user',
-        select: 'username avatar',
+        select: 'username avatar isVerified',
       },
     ]
 

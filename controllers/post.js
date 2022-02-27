@@ -29,7 +29,7 @@ exports.fetch_get = async (req, res) => {
   let populate = [
     {
       path: 'user',
-      select: 'username avatar',
+      select: 'username avatar isVerified',
     },
   ]
 
@@ -342,7 +342,7 @@ exports.comments_get = async (req, res) => {
     let populate = [
       {
         path: 'user',
-        select: 'username avatar',
+        select: 'username avatar isVerified',
       },
     ]
 

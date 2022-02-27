@@ -17,7 +17,10 @@ exports.fetch_get = async (req, res) => {
     populate: [
       {
         path: 'user',
-        select: 'username avatar',
+        select: 'username avatar isVerified',
+      },
+      {
+        path: 'post',
       },
     ],
   }
