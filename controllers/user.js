@@ -1,5 +1,6 @@
 const { User, Follower, Instrument, Watchlist } = require('../models')
 const nameSort = require('../utils/nameSort')
+const { generateToken } = require('./auth')
 
 exports.list_get = async (req, res) => {
   const { type } = req.query
@@ -42,7 +43,7 @@ exports.byUsername_get = async (req, res) => {
 
   try {
     let user = await User.findOne(query)
-      .select('username firstName lastName avatar categories isVerified')
+      .select('username firstName lastName bio avatar categories isVerified')
       .populate('followersCount followingCount')
     // .lean({ virtuals: true })
 
@@ -61,9 +62,38 @@ exports.details_get = async (req, res) => {
   }
 
   try {
-    let user = await User.findOne(query).select('username isVerified').lean()
+    let user = await User.findOne(query)
+      .select('username firstName lastName bio avatar categories isVerified')
+      .lean()
 
     return res.send(user)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.profile_get = async (req, res) => {
+  const { user } = req.decoded
+
+  let query = {
+    _id: user._id,
+  }
+
+  try {
+    let existingUser = await User.findOne(query)
+      .select('username firstName lastName bio avatar categories isVerified')
+      .lean()
+
+    if (!existingUser) {
+      return res.status(404).send({
+        error: 'User not found',
+      })
+    }
+
+    let token = generateToken(existingUser)
+
+    return res.send({ user: existingUser, token })
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
@@ -93,15 +123,14 @@ exports.create_post = async (req, res) => {
 exports.update_put = async (req, res) => {
   const { user } = req.decoded
 
-  const { username, email, firstName, lastName, website, avatar_url } = req.body
+  const { username, firstName, lastName, bio, avatar } = req.body
 
   let updates = {
     username,
-    email,
     firstName,
     lastName,
-    website,
-    avatar_url,
+    bio,
+    avatar,
   }
 
   try {

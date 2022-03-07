@@ -6,9 +6,15 @@ const userController = require('../controllers/user')
 
 // Controllers -----
 
+router.get('/profile', validateToken, userController.profile_get)
+
 router.get('/watchlist', validateToken, userController.user_watchlist_get)
 
-router.get('/watchlist/isWatching', validateToken, userController.user_isWatching_get)
+router.get(
+  '/watchlist/isWatching',
+  validateToken,
+  userController.user_isWatching_get
+)
 
 router.post('/watchlist', validateToken, userController.user_watchlist_post)
 

@@ -36,6 +36,9 @@ const UserSchema = new Schema(
     lastName: {
       type: String,
     },
+    bio: {
+      type: String,
+    },
     type: {
       type: String,
       enum: ['root', 'base'],
