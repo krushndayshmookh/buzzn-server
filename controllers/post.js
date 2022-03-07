@@ -31,6 +31,12 @@ exports.fetch_get = async (req, res) => {
       path: 'user',
       select: 'username avatar isVerified',
     },
+    {
+      path: 'likesCount'
+    },
+    {
+      path: 'commentsCount'
+    }
   ]
 
   try {
