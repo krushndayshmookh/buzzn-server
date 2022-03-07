@@ -2,21 +2,30 @@ const jwt = require('jsonwebtoken')
 
 const { User, Instrument } = require('../models')
 
+const JWTOptions = {
+  expiresIn: process.env.JWT_EXPIRES,
+  issuer: process.env.JWT_ISSUER,
+}
+const JWT_SECRET = process.env.JWT_SECRET
+
+const generateToken = user => jwt.sign({ user }, JWT_SECRET, JWTOptions)
+
+exports.generateToken = generateToken
+
 exports.login_post = async (req, res) => {
   const { email, password } = req.body
 
+  console.log({ email, password })
+
   User.findOne({ email, password })
+    .select('username firstName lastName bio avatar categories isVerified')
     .lean()
     .then(user => {
+
+      console.log({ user })
+
       if (user) {
-        // Create a token
-        const payload = { user }
-        const options = {
-          expiresIn: process.env.JWT_EXPIRES,
-          issuer: process.env.JWT_ISSUER,
-        }
-        const secret = process.env.JWT_SECRET
-        const token = jwt.sign(payload, secret, options)
+        const token = generateToken(user)
 
         return res.send({
           success: true,
