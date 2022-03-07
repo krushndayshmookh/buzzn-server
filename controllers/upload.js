@@ -3,37 +3,10 @@ const formidable = require('formidable')
 const aws = require('aws-sdk')
 const { v4: uuidv4 } = require('uuid')
 
-const asyncForEach = require('../utils/asyncForEach')
-
 const S3_BUCKET = process.env.S3_BUCKET
 aws.config.region = process.env.AWS_REGION
 
 const s3 = new aws.S3()
-
-// exports.s3_signed_put_get = (req, res) => {
-//   const fileName = req.query.fileName
-//   const fileType = req.query.fileType
-//
-//   const s3Params = {
-//     Bucket: S3_BUCKET,
-//     Key: fileName,
-//     Expires: 60,
-//     ContentType: fileType,
-//     ACL: 'public-read'
-//   }
-//
-//   s3.getSignedUrl('putObject', s3Params, (err, data) => {
-//     if (err) {
-//       console.error(err)
-//       return res.status(500).send(err)
-//     }
-//     const returnData = {
-//       signedRequest: data,
-//       url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
-//     }
-//     res.send(JSON.stringify(returnData))
-//   })
-// }
 
 exports.upload_post = async (req, res) => {
   const form = formidable({ multiples: true })
@@ -45,34 +18,39 @@ exports.upload_post = async (req, res) => {
       return res.status(500).send(err)
     }
 
-    if (!Array.isArray(files.media)) files.media = [files.media]
+    if (!Array.isArray(files)) files = [files.file]
 
-    asyncForEach(files.media, async file => {
-      awsName = uuidv4() + '.' + (fileExtRE.exec(file.name)[1] || 'png')
-      awsPath = `https://${S3_BUCKET}.s3.amazonaws.com/${awsName}`
+    let uploaded = []
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
 
-      var params = {
-        Body: fs.readFileSync(file.path),
-        Bucket: S3_BUCKET,
-        Key: awsName,
-        ACL: 'public-read',
+        let awsName =
+          uuidv4() + '.' + (fileExtRE.exec(file.originalFilename)[1] || 'png')
+        let awsPath = `https://${S3_BUCKET}.s3.amazonaws.com/${awsName}`
+
+        var params = {
+          Body: fs.readFileSync(file.filepath),
+          Bucket: S3_BUCKET,
+          Key: awsName,
+          ACL: 'public-read',
+        }
+
+        let data = await s3.upload(params).promise()
+
+        uploaded.push({
+          name: awsName,
+          path: awsPath,
+          type: file.mimetype,
+          data,
+        })
       }
+    } catch (err) {
+      console.error(err)
+      return res.status(500).send(err)
+    }
 
-      await s3
-        .putObject(params)
-        .promise()
-        .then(
-          function (data) {
-            // console.info(data)
-          },
-          function (error) {
-            console.error(error)
-          }
-        )
-      return { name: awsName, path: awsPath, type: file.type }
-    }).then(result => {
-      return res.json(result)
-    })
+    return res.send(uploaded)
   })
 }
 
@@ -88,7 +66,7 @@ exports.upload_delete = (req, res) => {
     .promise()
     .then(
       function (data) {
-        return res.send({ deleted: filename })
+        return res.send({ deleted: filename, data })
       },
       function (err) {
         console.error(err)

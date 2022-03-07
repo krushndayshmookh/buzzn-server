@@ -6,8 +6,6 @@ const uploadController = require('../controllers/upload')
 
 // Controllers -----
 
-// router.get('/s3/put/signed', uploadController.s3_signed_put_get)
-
 router.post('/', uploadController.upload_post)
 
 router.delete('/:filename', uploadController.upload_delete)
