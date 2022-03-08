@@ -32,11 +32,11 @@ exports.fetch_get = async (req, res) => {
       select: 'username avatar isVerified',
     },
     {
-      path: 'likesCount'
+      path: 'likesCount',
     },
     {
-      path: 'commentsCount'
-    }
+      path: 'commentsCount',
+    },
   ]
 
   try {
@@ -53,6 +53,36 @@ exports.fetch_get = async (req, res) => {
       posts = await Post.find(query).sort(sort).populate(populate)
     }
     return res.send(posts)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.fetch_single_get = async (req, res) => {
+  const { postId } = req.params
+
+  let query = {
+    _id: postId,
+  }
+
+  let populate = [
+    {
+      path: 'user',
+      select: 'username avatar isVerified',
+    },
+    {
+      path: 'likesCount',
+    },
+    {
+      path: 'commentsCount',
+    },
+  ]
+
+  try {
+    let post = await Post.findOne(query).populate(populate)
+
+    return res.send(post)
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })

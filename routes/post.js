@@ -8,6 +8,8 @@ router.post('/', validateToken, postController.create_post)
 
 router.get('/', postController.fetch_get)
 
+router.get('/:postId', postController.fetch_single_get)
+
 router.post('/:postId/comments', validateToken, postController.comments_post)
 
 router.get('/:postId/comments', validateToken, postController.comments_get)
@@ -39,7 +41,7 @@ router.delete(
 )
 
 router.get('*', (req, res) => {
-  res.send('Please read documentation for the API. (user)')
+  res.send('Please read documentation for the API. (post)')
 })
 
 // Export -----
