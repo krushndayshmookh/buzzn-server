@@ -23,6 +23,12 @@ const PostSchema = new Schema(
         color: {
           type: String,
         },
+        textColor: {
+          type: String,
+        },
+        font: {
+          type: String,
+        },
       },
       article: {
         title: {
@@ -40,6 +46,12 @@ const PostSchema = new Schema(
           type: String,
         },
         thumbnail: {
+          type: String,
+        },
+        original: {
+          type: String,
+        },
+        originalFilename: {
           type: String,
         },
       },

@@ -8,6 +8,9 @@ const {
 } = require('../models')
 
 const BLOCK_COUNTS = require('../configs/PostTypeBlockCounts')
+const PROCESSING_SERVER_URL = process.env.PROCESSING_SERVER_URL
+
+const axios = require('axios')
 
 exports.fetch_get = async (req, res) => {
   const { page, limit, user, type } = req.query
@@ -90,7 +93,7 @@ exports.fetch_single_get = async (req, res) => {
 }
 
 exports.create_post = async (req, res) => {
-  const { type, text, image_url, caption } = req.body
+  const { type, content } = req.body
   const { user } = req.decoded
 
   const blockCount = BLOCK_COUNTS[type]
@@ -99,18 +102,7 @@ exports.create_post = async (req, res) => {
     const newPost = new Post({
       user: user._id,
       type,
-      text,
-      content: {
-        text: {
-          content: text,
-          color: '#BBD686',
-        },
-
-        image: {
-          content: image_url,
-          caption: caption,
-        },
-      },
+      content,
     })
 
     await newPost.save()
@@ -139,6 +131,14 @@ exports.create_post = async (req, res) => {
     })
 
     await blockDelta.save()
+
+    if (newPost.type === 'image') {
+      axios
+        .post(PROCESSING_SERVER_URL + '/api/process/post/image', {
+          post: newPost._id,
+        })
+        .catch(console.error)
+    }
 
     return res.status(201).send({ success: true })
   } catch (err) {
