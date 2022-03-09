@@ -1,0 +1,50 @@
+const performDatabaseUpdate = require('../performDatabaseUpdate')
+const PROCESSING_SERVER_URL = process.env.PROCESSING_SERVER_URL
+
+const axios = require('axios')
+
+const { Post } = require('../../models')
+
+async function run() {
+  try {
+    // fetch posts
+    const posts = await Post.find({ type: 'image' })
+
+    // set count to 0
+    let count = 0
+
+    // loop over each post and check their image server
+    for (let post of posts) {
+      const imageURL = post.content.image.content
+
+      console.log(imageURL)
+
+      if (!imageURL || !imageURL.includes('https')) {
+        await post.delete()
+      }
+
+      if (!imageURL.includes('cdn')) {
+        post.content.image.original = imageURL
+        await post.save()
+
+        axios
+          .post(PROCESSING_SERVER_URL + '/api/process/post/image', {
+            post: post._id,
+          })
+          .catch(console.error)
+        count++
+      }
+    }
+
+    console.log(`${count}/${posts.length} posts processed`)
+    console.log('done')
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const main = async () => {
+  await performDatabaseUpdate(run)
+}
+
+main()
