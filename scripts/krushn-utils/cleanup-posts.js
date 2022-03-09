@@ -23,7 +23,7 @@ async function run() {
         await post.delete()
       }
 
-      if (!imageURL.includes('cdn')) {
+      else if (!imageURL.includes('cdn')) {
         post.content.image.original = imageURL
         await post.save()
 
