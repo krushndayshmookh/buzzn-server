@@ -25,8 +25,9 @@ exports.upload_post = async (req, res) => {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
 
-        let awsName =
-          uuidv4() + '.' + (fileExtRE.exec(file.originalFilename)[1] || 'png')
+        let awsName = `original/${uuidv4()}.${
+          fileExtRE.exec(file.originalFilename)[1] || 'png'
+        }`
         let awsPath = `https://${S3_BUCKET}.s3.amazonaws.com/${awsName}`
 
         var params = {
