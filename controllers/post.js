@@ -15,7 +15,9 @@ const axios = require('axios')
 exports.fetch_get = async (req, res) => {
   const { page, limit, user, type } = req.query
 
-  let query = {}
+  let query = {
+    isDeleted: false,
+  }
 
   if (type) {
     query.type = type
@@ -67,6 +69,7 @@ exports.fetch_single_get = async (req, res) => {
 
   let query = {
     _id: postId,
+    isDeleted: false,
   }
 
   let populate = [
@@ -84,6 +87,11 @@ exports.fetch_single_get = async (req, res) => {
 
   try {
     let post = await Post.findOne(query).populate(populate)
+    if (!post) {
+      return res.status(404).send({
+        error: 'Post not found',
+      })
+    }
 
     return res.send(post)
   } catch (err) {

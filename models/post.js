@@ -72,6 +72,10 @@ const PostSchema = new Schema(
         },
       },
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: {
