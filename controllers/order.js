@@ -43,13 +43,16 @@ exports.fetchOrders_get = async (req, res) => {
 
 exports.placeOrder_post = async (req, res) => {
   const { user } = req.decoded
-  const {
+  let {
     transactionType,
     instrument: instrumentId,
     quantity,
     price,
     type,
   } = req.body
+
+  quantity = parseFloat(quantity)
+  price = parseFloat(price)
 
   try {
     let instrument = await Instrument.findById(instrumentId)
