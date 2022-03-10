@@ -112,7 +112,7 @@ module.exports = async newOrder => {
       newOrder.status = 'executed'
       await newOrder.save()
       await Config.updateOne(
-        { _id: process.env.CONFIG_NAME },
+        { name: process.env.CONFIG_NAME },
         { $inc: { systemCommission: totalSystemCommission } }
       )
       return
@@ -206,7 +206,7 @@ module.exports = async newOrder => {
 
       if (newOrder.status == 'executed') {
         await Config.updateOne(
-          { _id: process.env.CONFIG_NAME },
+          { name: process.env.CONFIG_NAME },
           { $inc: { systemCommission: totalSystemCommission } }
         )
         return
@@ -316,7 +316,7 @@ module.exports = async newOrder => {
 
       if (newOrder.status == 'executed') {
         await Config.updateOne(
-          { _id: process.env.CONFIG_NAME },
+          { name: process.env.CONFIG_NAME },
           { $inc: { systemCommission: totalSystemCommission } }
         )
         return
