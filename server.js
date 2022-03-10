@@ -101,6 +101,35 @@ app.use('/', require('./routes'))
 // const directories = [UPLOADS_DIR]
 // require('./utils/mkdirSync')(directories)
 
+// display server information on startup
+async function displayServerInfo() {
+  const { name, version: serverVersion } = require('./package.json')
+  const { name: dbName } = db
+  const now = new Date()
+
+  console.log(`============================================================`)
+  console.log(`${name} v${serverVersion} - [${dbName}]`)
+  console.log(`Server started at ${now}`)
+  console.log(`============================================================`)
+}
+
+// generate config if not exists
+const { Config } = require('./models')
+
+async function generateConfig() {
+  let config = await Config.findOne({ name: process.env.CONFIG_NAME })
+  if (!config) {
+    config = new Config({
+      name: process.env.CONFIG_NAME,
+      commission: 0,
+    })
+    await config.save()
+    console.log('Config generated.')
+  }
+}
+
+generateConfig().then(displayServerInfo)
+
 server.listen(PORT, err => {
   if (err) throw err
   console.info('Listening on port ' + PORT + '...')

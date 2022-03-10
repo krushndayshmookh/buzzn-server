@@ -1,5 +1,5 @@
 {
-  "name": "root-template-express",
+  "name": "buzzn-server",
   "version": "1.0.0",
   "description": "Backend template for Root Kings Express Applications",
   "main": "server.js",
