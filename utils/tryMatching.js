@@ -77,7 +77,7 @@ module.exports = async newOrder => {
         const blockDeltaBuyer = new BlockDelta({
           user: newOrder.user,
           instrument: instrument._id,
-          type: 'trade-fresh-buy',
+          type: 'fresh-buy',
           quantity: newTrade.quantity,
           data: {
             trade: newTrade._id,
@@ -87,7 +87,7 @@ module.exports = async newOrder => {
         const blockDeltaSeller = new BlockDelta({
           user: instrument.user,
           instrument: instrument._id,
-          type: 'trade-fresh-sell',
+          type: 'fresh-sell',
           quantity: -newTrade.quantity,
           data: {
             trade: newTrade._id,
@@ -168,7 +168,7 @@ module.exports = async newOrder => {
       const blockDeltaBuyer = new BlockDelta({
         user: newOrder.user,
         instrument: instrument._id,
-        type: 'trade-buy',
+        type: 'buy',
         quantity: newTrade.quantity,
         data: {
           trade: newTrade._id,
@@ -178,7 +178,7 @@ module.exports = async newOrder => {
       const blockDeltaSeller = new BlockDelta({
         user: candidateOrder.user,
         instrument: instrument._id,
-        type: 'trade-sell',
+        type: 'sell',
         quantity: -newTrade.quantity,
         data: {
           trade: newTrade._id,
@@ -278,7 +278,7 @@ module.exports = async newOrder => {
       const blockDeltaBuyer = new BlockDelta({
         user: candidateOrder.user,
         instrument: instrument._id,
-        type: 'trade-buy',
+        type: 'buy',
         quantity: newTrade.quantity,
         data: {
           trade: newTrade._id,
@@ -288,7 +288,7 @@ module.exports = async newOrder => {
       const blockDeltaSeller = new BlockDelta({
         user: newOrder.user,
         instrument: instrument._id,
-        type: 'trade-sell',
+        type: 'sell',
         quantity: -newTrade.quantity,
         data: {
           trade: newTrade._id,

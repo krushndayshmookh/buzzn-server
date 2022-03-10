@@ -17,7 +17,14 @@ const BlockDeltaSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['mint', 'buy', 'sell', 'float'],
+      enum: [
+        'mint',
+        'buy',
+        'sell',
+        'float',
+        'fresh-buy',
+        'fresh-sell',
+      ],
       required: true,
     },
     data: {
