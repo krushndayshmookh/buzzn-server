@@ -78,6 +78,11 @@ exports.placeOrder_post = async (req, res) => {
       if (quantity > availableToBuy) {
         return res.status(400).send('Invalid quantity')
       }
+
+      let amount = quantity * price
+      if (amount > user.chips) {
+        return res.status(400).send('Insufficient balance')
+      }
     }
 
     if (transactionType == 'sell') {

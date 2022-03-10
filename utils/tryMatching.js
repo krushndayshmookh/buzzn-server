@@ -1,7 +1,8 @@
-const { Order, Trade, Instrument, Holding } = require('../models')
+const { Order, Trade, Instrument, Holding, User } = require('../models')
 
 module.exports = async newOrder => {
   let qtyMatched = 0
+  let amountMatched = 0
   let instrument = await Instrument.findById(newOrder.instrument)
   let holding = await Holding.findOne({
     instrument: instrument._id,
@@ -29,6 +30,7 @@ module.exports = async newOrder => {
 
         await newTrade.save()
         qtyMatched += newTrade.quantity
+        amountMatched += newTrade.quantity * newTrade.price
 
         newOrder.trades.push(newTrade)
         await newOrder.save()
@@ -47,6 +49,7 @@ module.exports = async newOrder => {
     if (qtyMatched == newOrder.quantity) {
       newOrder.status = 'executed'
       await newOrder.save()
+      await User.updateOne({ _id: newOrder.user }, { $inc: { chips: -amountMatched } })
       return
     }
 
@@ -75,6 +78,7 @@ module.exports = async newOrder => {
 
       await newTrade.save()
       qtyMatched += newTrade.quantity
+      amountMatched += newTrade.quantity * newTrade.price
 
       newOrder.trades.push(newTrade)
       holding.quantity += newTrade.quantity
@@ -89,6 +93,7 @@ module.exports = async newOrder => {
       }
 
       await newOrder.save()
+      await User.updateOne({ _id: newOrder.user }, { $inc: { chips: -amountMatched } })
       await candidateOrder.save()
       await holding.save()
 
@@ -128,6 +133,7 @@ module.exports = async newOrder => {
 
       await newTrade.save()
       qtyMatched += newTrade.quantity
+      amountMatched += newTrade.quantity * newTrade.price
 
       newOrder.trades.push(newTrade)
 
@@ -155,6 +161,7 @@ module.exports = async newOrder => {
       }
 
       await newOrder.save()
+      await User.updateOne({ _id: newOrder.user }, { $inc: { chips: amountMatched } })
       await candidateHolding.save()
       await candidateOrder.save()
 
