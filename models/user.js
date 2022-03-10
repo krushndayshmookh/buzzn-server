@@ -61,6 +61,10 @@ const UserSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    chips: {
+      type: Number,
+      default: 1000,
+    },
   },
   {
     toJSON: {

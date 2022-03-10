@@ -1,5 +1,5 @@
 const { User, Follower, Instrument, Watchlist } = require('../models')
-const nameSort = require('../utils/nameSort')
+const stringSort = require('../utils/stringSort')
 const { generateToken } = require('./auth')
 
 exports.list_get = async (req, res) => {
@@ -82,7 +82,9 @@ exports.profile_get = async (req, res) => {
 
   try {
     let existingUser = await User.findOne(query)
-      .select('username firstName lastName bio avatar categories isVerified')
+      .select(
+        'username firstName lastName bio avatar categories isVerified chips'
+      )
       .lean()
 
     if (!existingUser) {
@@ -371,11 +373,24 @@ exports.user_watchlist_get = async (req, res) => {
     user: user._id,
   }
 
-  let populate = [{ path: 'instrument' }]
+  let populate = [
+    {
+      path: 'instrument',
+      populate: [
+        {
+          path: 'user',
+          select: 'username',
+        },
+      ],
+    },
+  ]
 
   try {
     let userInstruments = await Watchlist.find(query).populate(populate).lean()
-    let instruments = userInstruments.map(i => i.instrument).sort(nameSort)
+
+    let instruments = userInstruments
+      .map(i => i.instrument)
+      .sort((a, b) => stringSort(a.user.username, b.user.username, false))
 
     return res.send(instruments)
   } catch (err) {
