@@ -1,4 +1,4 @@
-const { Order, Trade, Instrument, Holding, User } = require('../models')
+const { Order, Trade, Instrument, Holding, User, BlockDelta } = require('../models')
 
 module.exports = async newOrder => {
   let qtyMatched = 0
@@ -43,13 +43,43 @@ module.exports = async newOrder => {
         instrument.delta = newOrder.price - instrument.ltp
         instrument.ltp = newOrder.price
         await instrument.save()
+
+        const blockDeltaBuyer = new BlockDelta({
+          user: newOrder.user,
+          instrument: instrument._id,
+          type: 'trade-fresh-buy',
+          quantity: newTrade.quantity,
+          data: {
+            trade: newTrade._id,
+          },
+        })
+
+        const blockDeltaSeller = new BlockDelta({
+          user: instrument.user,
+          instrument: instrument._id,
+          type: 'trade-fresh-sell',
+          quantity: -newTrade.quantity,
+          data: {
+            trade: newTrade._id,
+          },
+        })
+
+        await blockDeltaBuyer.save()
+        await blockDeltaSeller.save()
       }
     }
 
     if (qtyMatched == newOrder.quantity) {
       newOrder.status = 'executed'
       await newOrder.save()
-      await User.updateOne({ _id: newOrder.user }, { $inc: { chips: -amountMatched } })
+      await User.updateOne(
+        { _id: newOrder.user },
+        { $inc: { chips: -amountMatched } }
+      )
+      await User.updateOne(
+        { _id: instrument.user },
+        { $inc: { chips: +amountMatched } }
+      )
       return
     }
 
@@ -92,8 +122,38 @@ module.exports = async newOrder => {
         candidateOrder.status = 'executed'
       }
 
+      const blockDeltaBuyer = new BlockDelta({
+        user: newOrder.user,
+        instrument: instrument._id,
+        type: 'trade-buy',
+        quantity: newTrade.quantity,
+        data: {
+          trade: newTrade._id,
+        },
+      })
+
+      const blockDeltaSeller = new BlockDelta({
+        user: candidateOrder.user,
+        instrument: instrument._id,
+        type: 'trade-sell',
+        quantity: -newTrade.quantity,
+        data: {
+          trade: newTrade._id,
+        },
+      })
+
+      await blockDeltaBuyer.save()
+      await blockDeltaSeller.save()
+
       await newOrder.save()
-      await User.updateOne({ _id: newOrder.user }, { $inc: { chips: -amountMatched } })
+      await User.updateOne(
+        { _id: newOrder.user },
+        { $inc: { chips: -amountMatched } }
+      )
+      await User.updateOne(
+        { _id: candidateOrder.user },
+        { $inc: { chips: amountMatched } }
+      )
       await candidateOrder.save()
       await holding.save()
 
@@ -124,8 +184,8 @@ module.exports = async newOrder => {
       let qtyPending = newOrder.quantity - qtyMatched
 
       let newTrade = new Trade({
-        buyer: newOrder.user,
-        seller: candidateOrder.user,
+        seller: newOrder.user,
+        buyer: candidateOrder.user,
         instrument: newOrder.instrument,
         price: candidateOrder.price,
         quantity: Math.min(qtyPending, candidateOrder.unmatchedQuantity),
@@ -160,8 +220,38 @@ module.exports = async newOrder => {
         candidateOrder.status = 'executed'
       }
 
+      const blockDeltaBuyer = new BlockDelta({
+        user: candidateOrder.user,
+        instrument: instrument._id,
+        type: 'trade-buy',
+        quantity: newTrade.quantity,
+        data: {
+          trade: newTrade._id,
+        },
+      })
+
+      const blockDeltaSeller = new BlockDelta({
+        user: newOrder.user,
+        instrument: instrument._id,
+        type: 'trade-sell',
+        quantity: -newTrade.quantity,
+        data: {
+          trade: newTrade._id,
+        },
+      })
+
+      await blockDeltaBuyer.save()
+      await blockDeltaSeller.save()
+
       await newOrder.save()
-      await User.updateOne({ _id: newOrder.user }, { $inc: { chips: amountMatched } })
+      await User.updateOne(
+        { _id: newOrder.user },
+        { $inc: { chips: amountMatched } }
+      )
+      await User.updateOne(
+        { _id: candidateOrder.user },
+        { $inc: { chips: -amountMatched } }
+      )
       await candidateHolding.save()
       await candidateOrder.save()
 
