@@ -28,6 +28,12 @@ const TradeSchema = new Schema(
       type: Number,
       required: true,
     },
+    ownerCommission: {
+      type: Number,
+    },
+    systemCommission: {
+      type: Number,
+    }
   },
   {
     toJSON: {

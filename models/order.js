@@ -25,7 +25,7 @@ const OrderSchema = new Schema(
     },
     transactionType: {
       type: String,
-      enum: ['buy', 'sell'],
+      enum: ['buy', 'sell', 'fresh-sell'],
       required: true,
     },
     status: {
@@ -55,15 +55,21 @@ const OrderSchema = new Schema(
   }
 )
 
+OrderSchema.virtual('totalAmount').get(function () {
+  if (!this.trades || this.trades.length === 0) {
+    return 0
+  }
+  const totalAmount = this.trades.reduce((total, trade) => {
+    return total + trade.price * trade.quantity
+  }, 0)
+  return totalAmount
+})
+
 OrderSchema.virtual('averagePrice').get(function () {
   if (!this.trades || this.trades.length === 0) {
     return 0
   }
-  const totalPrice = this.trades.reduce((total, trade) => {
-    return total + trade.price * trade.quantity
-  }, 0)
-
-  return totalPrice / this.matchedQuantity
+  return this.totalAmount / this.matchedQuantity
 })
 
 OrderSchema.virtual('matchedQuantity').get(function () {
@@ -78,6 +84,23 @@ OrderSchema.virtual('matchedQuantity').get(function () {
 
 OrderSchema.virtual('unmatchedQuantity').get(function () {
   return this.quantity - this.matchedQuantity
+})
+
+OrderSchema.virtual('totalCommission').get(function () {
+  if (this.transactionType === 'buy') {
+    return 0
+  }
+  if (!this.trades || this.trades.length === 0) {
+    return 0
+  }
+  const totalCommission = this.trades.reduce((total, trade) => {
+    return total + trade.ownerCommission + trade.systemCommission
+  }, 0)
+  return totalCommission
+})
+
+OrderSchema.virtual('finalAmount').get(function () {
+  return this.totalAmount - this.totalCommission
 })
 
 OrderSchema.plugin(mongoosePaginate)
