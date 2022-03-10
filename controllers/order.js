@@ -16,7 +16,13 @@ exports.fetchOrders_get = async (req, res) => {
   let populate = [
     {
       path: 'instrument',
-      select: 'symbol',
+      select: 'symbol user',
+      populate: [
+        {
+          path: 'user',
+          select: 'username',
+        },
+      ],
     },
     {
       path: 'trades',
