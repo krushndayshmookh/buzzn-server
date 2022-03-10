@@ -1,4 +1,4 @@
-const { Holding } = require('../models')
+const { Holding, Instrument } = require('../models')
 
 exports.holdings_get = async (req, res) => {
   const { user } = req.decoded
@@ -13,6 +13,12 @@ exports.holdings_get = async (req, res) => {
     {
       path: 'instrument',
       select: 'symbol ltp',
+      populate: [
+        {
+          path: 'user',
+          select: 'username',
+        },
+      ],
     },
   ]
 
@@ -20,6 +26,39 @@ exports.holdings_get = async (req, res) => {
 
   try {
     let holdings = await Holding.find(query).populate(populate).lean()
+
+    res.send(holdings)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.holders_get = async (req, res) => {
+  const { user } = req.decoded
+
+  let instrument = await Instrument.findOne({ user: user._id })
+
+  let query = {
+    instrument: instrument._id,
+  }
+
+  let populate = [
+    {
+      path: 'user',
+      select: 'username avatar',
+    },
+  ]
+
+  let sort = {
+    quantity: -1,
+  }
+
+  try {
+    let holdings = await Holding.find(query)
+      .sort(sort)
+      .populate(populate)
+      .lean()
 
     res.send(holdings)
   } catch (err) {

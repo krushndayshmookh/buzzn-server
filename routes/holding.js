@@ -8,6 +8,8 @@ const holdingController = require('../controllers/holding')
 
 router.get('/', validateToken, holdingController.holdings_get)
 
+router.get('/holders', validateToken, holdingController.holders_get)
+
 router.get('*', (req, res) => {
   res.send('Please read documentation for the API. (holding)')
 })
