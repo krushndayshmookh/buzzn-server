@@ -18,6 +18,9 @@ exports.fetchOrders_get = async (req, res) => {
       path: 'instrument',
       select: 'symbol',
     },
+    {
+      path: 'trades',
+    },
   ]
 
   let options = {

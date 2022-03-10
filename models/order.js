@@ -40,7 +40,7 @@ const OrderSchema = new Schema(
     trades: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'Trades',
+        ref: 'Trade',
       },
     ],
   },
@@ -56,21 +56,22 @@ const OrderSchema = new Schema(
 )
 
 OrderSchema.virtual('averagePrice').get(function () {
-  if (!this.transactions || this.transactions.length === 0) {
+  if (!this.trades || this.trades.length === 0) {
     return 0
   }
-  const totalPrice = this.transactions.reduce((total, transaction) => {
-    return total + transaction.price * transaction.quantity
+  const totalPrice = this.trades.reduce((total, trade) => {
+    return total + trade.price * trade.quantity
   }, 0)
-  return totalPrice / this.transactions.length
+
+  return totalPrice / this.matchedQuantity
 })
 
 OrderSchema.virtual('matchedQuantity').get(function () {
-  if (!this.transactions || this.transactions.length === 0) {
+  if (!this.trades || this.trades.length === 0) {
     return 0
   }
-  const qty = this.transactions.reduce((total, transaction) => {
-    return total + transaction.quantity
+  const qty = this.trades.reduce((total, trade) => {
+    return total + trade.quantity
   }, 0)
   return qty
 })
