@@ -379,7 +379,7 @@ exports.user_watchlist_get = async (req, res) => {
       populate: [
         {
           path: 'user',
-          select: 'username',
+          select: 'username avatar',
         },
       ],
     },
