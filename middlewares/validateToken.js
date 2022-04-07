@@ -7,7 +7,7 @@ const validateToken = (req, res, next) => {
     const token = req.headers.authorization.split(' ')[1] // Bearer <token>
     const options = {
       expiresIn: process.env.JWT_EXPIRES,
-      issuer: process.env.JWT_ISSUER
+      issuer: process.env.JWT_ISSUER,
     }
     const secret = process.env.JWT_SECRET
     try {
@@ -20,12 +20,22 @@ const validateToken = (req, res, next) => {
       next()
     } catch (err) {
       // Throw an error just in case anything goes wrong with verification
-      throw new Error(err)
+      if (err.name === 'TokenExpiredError') {
+        res.status(401).json({
+          error: 'Token expired',
+        })
+      } else {
+        res.status(401).json({
+          error: 'Invalid token',
+        })
+      }
+
+      if (process.env.NODE_ENV === 'development') throw new Error(err)
     }
   } else {
     result = {
       error: `Authentication error. Token required.`,
-      status: 401
+      status: 401,
     }
     res.status(401).send(result)
   }
