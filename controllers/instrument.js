@@ -31,7 +31,9 @@ exports.instrument_get = async (req, res) => {
 exports.blocks_float_post = async (req, res) => {
   const { user } = req.decoded
 
-  const { quantity } = req.body
+  let { quantity } = req.body
+
+  quantity = parseInt(quantity, 10) || 0
 
   try {
     let instrument = await Instrument.findOne({
@@ -141,10 +143,7 @@ exports.chart_get = async (req, res) => {
 
     let select = 'createdAt price'
 
-    let chart = await Trade.find(query)
-      .sort(sort)
-      .select(select)
-      .lean()
+    let chart = await Trade.find(query).sort(sort).select(select).lean()
 
     res.send(chart)
   } catch (err) {
