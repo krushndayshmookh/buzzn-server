@@ -11,7 +11,7 @@ const cors = require('cors')
 const logger = require('morgan')
 
 // const multer = require('multer')
-// const path = require('path')
+const path = require('path')
 
 const http = require('http')
 
@@ -19,8 +19,8 @@ const http = require('http')
 
 const PORT = process.env.PORT || 3000
 const MONGODB_URI = process.env.MONGODB_URI
-// const UPLOADS_DIR = process.env.UPLOADS_DIR
-// const PUBLIC_DIR = path.join(__dirname, process.env.PUBLIC_DIR)
+const UPLOADS_DIR = process.env.UPLOADS_DIR
+const PUBLIC_DIR = path.join(__dirname, process.env.PUBLIC_DIR)
 
 let app = express()
 
@@ -61,7 +61,7 @@ app.use(
   })
 )
 
-// app.use(express.static(PUBLIC_DIR));
+app.use(express.static(PUBLIC_DIR));
 
 // const storage = multer.diskStorage({
 //   destination: function (req, file, cb) {
@@ -98,8 +98,8 @@ app.use('/', require('./routes'))
 // });
 
 // make required dirs
-// const directories = [UPLOADS_DIR]
-// require('./utils/mkdirSync')(directories)
+const directories = [UPLOADS_DIR]
+require('./utils/mkdirSync')(directories)
 
 // display server information on startup
 async function displayServerInfo() {

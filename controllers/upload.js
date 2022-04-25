@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs = require('fs-extra')
 const formidable = require('formidable')
 const aws = require('aws-sdk')
 const { v4: uuidv4 } = require('uuid')
@@ -21,6 +21,7 @@ exports.upload_post = async (req, res) => {
     if (!Array.isArray(files)) files = [files.file]
 
     let uploaded = []
+
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
@@ -37,7 +38,20 @@ exports.upload_post = async (req, res) => {
           ACL: 'public-read',
         }
 
-        let data = await s3.upload(params).promise()
+        let data
+
+        if (process.env.NODE_ENV != 'development') {
+          data = await s3.upload(params).promise()
+        } else {
+          awsPath = '/uploads/' + awsName
+
+          await fs.ensureDirSync(__dirname + '/../public/uploads/original')
+          await fs.copyFileSync(
+            file.filepath,
+            __dirname + '/../public' + awsPath
+          )
+          awsPath = 'http://localhost:3000' + awsPath
+        }
 
         uploaded.push({
           name: awsName,
