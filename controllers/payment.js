@@ -82,8 +82,9 @@ exports.transactions_get = async (req, res) => {
   const { user } = req.decoded
 
   try {
-    const payments = await Payment.find({ user: user._id })
-    .sort({ createdAt: -1 })
+    const payments = await Payment.find({ user: user._id }).sort({
+      createdAt: -1,
+    })
 
     return res.send(payments)
   } catch (err) {

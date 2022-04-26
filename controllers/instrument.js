@@ -18,6 +18,7 @@ exports.instrument_get = async (req, res) => {
   let query = {
     _id: instrumentId,
   }
+
   try {
     let instrument = await Instrument.findOne(query).lean()
 

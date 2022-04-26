@@ -15,16 +15,20 @@ exports.generateToken = generateToken
 exports.login_post = async (req, res) => {
   const { email, password } = req.body
 
-  console.log({ email, password })
-
-  User.findOne({ email, password })
-    .select('username firstName lastName bio avatar categories isVerified')
+  User.findOne({ email })
+    .select(
+      'username firstName lastName bio avatar categories isVerified password'
+    )
     .lean()
     .then(user => {
+      if (!user) {
+        return res
+          .status(401)
+          .send({ success: false, message: 'Invalid email' })
+      }
 
-      console.log({ user })
-
-      if (user) {
+      if (user.password === password) {
+        delete user.password
         const token = generateToken(user)
 
         return res.send({
@@ -32,11 +36,11 @@ exports.login_post = async (req, res) => {
           token,
           user,
         })
-      } else {
-        return res.send({
-          success: false,
-        })
       }
+
+      return res
+        .status(401)
+        .send({ success: false, message: 'Invalid password' })
     })
     .catch(err => {
       console.error(err)

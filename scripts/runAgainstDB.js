@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const performDatabaseUpdate = require('./performDatabaseUpdate')
 const moment = require('moment-timezone')
 const fs = require('fs-extra')

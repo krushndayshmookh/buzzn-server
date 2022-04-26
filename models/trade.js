@@ -33,7 +33,7 @@ const TradeSchema = new Schema(
     },
     systemCommission: {
       type: Number,
-    }
+    },
   },
   {
     toJSON: {

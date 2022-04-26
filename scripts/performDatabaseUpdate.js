@@ -9,7 +9,7 @@ async function performDatabaseUpdate(operation) {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
-    useCreateIndex: true
+    useCreateIndex: true,
   })
   mongoose.Promise = global.Promise
 
