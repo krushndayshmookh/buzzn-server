@@ -6,8 +6,15 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "lint": "eslint --ext .js . --fix",
-    "prettify": "prettier --write '**/*.js'"
+    "lint": "eslint --ext .js,.json . --fix ",
+    "prettify": "prettier --write '**/*{.js,.json}'",
+    "hooks:pre-commit": "node ./hooks/pre-commit.js",
+    "hooks:pre-push": "node ./hooks/pre-push.js",
+    "prepare": "husky install"
+  },
+  "husky": {
+    "pre-commit": "npm run hooks:pre-commit",
+    "pre-push": "npm run hooks:pre-push"
   },
   "author": "Krushn Dayshmookh <krushndayshmookh@gmail.com>",
   "license": "MIT",
@@ -15,12 +22,13 @@
     "@sendgrid/mail": "^7.2.3",
     "aws-sdk": "^2.1087.0",
     "axios": "^0.26.0",
-    "chalk": "^4.1.0",
+    "chalk": "^4.1.2",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "formidable": "^2.0.1",
     "fs-extra": "^10.0.1",
+    "husky": "^8.0.1",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.26.0",
     "moment-timezone": "^0.5.31",
@@ -30,14 +38,18 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.2",
     "pug": "^3.0.0",
+    "shelljs": "^0.8.5",
     "socket.io": "^4.4.1",
     "stripe": "^8.208.0",
     "unique-string": "^2.0.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "eslint": "^7.6.0",
+    "@babel/eslint-parser": "^7.17.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
     "nodemon": "^2.0.4",
-    "prettier": "^2.6.2"
+    "prettier": "2.6.2"
   }
 }
