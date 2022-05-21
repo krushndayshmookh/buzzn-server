@@ -131,20 +131,59 @@ exports.chart_get = async (req, res) => {
       return res.status(404).send({ error: 'instrument not found' })
     }
 
-    let query = {
-      instrument: instrumentId,
+    let queryWithDate = {
+      instrument: instrument._id,
       createdAt: {
         $gte: moment().subtract(1, 'months').toDate(),
       },
     }
 
+    let queryWithLimit = {
+      instrument: instrument._id,
+    }
+
+    let limit = 100
+
     let sort = {
       createdAt: 1,
     }
 
-    let select = 'createdAt price'
+    let project = {
+      createdAt: {
+        $toLong: '$createdAt',
+      },
+      price: 1,
+    }
 
-    let chart = await Trade.find(query).sort(sort).select(select).lean()
+    let chart = []
+
+    chart = await Trade.aggregate([
+      { $match: queryWithDate },
+      { $sort: sort },
+      { $project: project },
+    ])
+
+    if (!chart.length) {
+      chart = await Trade.aggregate([
+        { $match: queryWithLimit },
+        { $sort: sort },
+        { $limit: limit },
+        { $project: project },
+      ])
+    }
+
+    if (!chart.length) {
+      chart = [
+        {
+          createdAt: new moment(instrument.createdAt).valueOf(),
+          price: instrument.ltp,
+        },
+        {
+          createdAt: new moment.tz('Asia/Kolkata').valueOf(),
+          price: instrument.ltp,
+        },
+      ]
+    }
 
     res.send(chart)
   } catch (err) {
