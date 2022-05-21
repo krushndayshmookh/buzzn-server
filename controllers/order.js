@@ -112,7 +112,12 @@ exports.placeOrder_post = async (req, res) => {
       await holding.save()
     }
 
-    tryMatching(newOrder)
+    try {
+      await tryMatching(newOrder)
+    } catch (err) {
+      console.error({ err })
+      return res.status(500).send({ err })
+    }
 
     // imeplement matching algorithm
 

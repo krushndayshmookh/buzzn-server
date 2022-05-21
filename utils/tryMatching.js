@@ -129,7 +129,11 @@ module.exports = async newOrder => {
       user: {
         $ne: newOrder.user,
       },
-    }).sort({ price: -1, createdAt: 1 })
+    })
+      .populate(
+        'trades totalAmount averagePrice matchedQuantity unmatchedQuantity totalCommission finalAmount'
+      )
+      .sort({ price: -1, createdAt: 1 })
 
     for (let candidateOrder of matchingOrders) {
       let qtyPending = newOrder.quantity - qtyMatched
@@ -226,7 +230,29 @@ module.exports = async newOrder => {
       user: {
         $ne: newOrder.user,
       },
-    }).sort({ price: -1, createdAt: 1 })
+    })
+      .populate(
+        // 'trades'
+        'trades totalAmount averagePrice matchedQuantity unmatchedQuantity totalCommission finalAmount'
+      )
+      .sort({ price: -1, createdAt: 1 })
+
+    // .select(`
+    // user
+    // instrument
+    // quantity
+    // price
+    // transactionType
+    // status
+    // type
+    // trades
+    // totalAmount
+    // averagePrice
+    // matchedQuantity
+    // unmatchedQuantity
+    // totalCommission
+    // finalAmount
+    // `)
 
     for (let candidateOrder of matchingOrders) {
       let qtyPending = newOrder.quantity - qtyMatched
