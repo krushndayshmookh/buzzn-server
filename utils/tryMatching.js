@@ -27,6 +27,8 @@ module.exports = async newOrder => {
   }
 
   if (newOrder.transactionType == 'buy') {
+    // console.log('==> BUY')
+
     if (instrument.fresh) {
       // fresh buy
       if (newOrder.price >= instrument.ltp) {
@@ -71,7 +73,7 @@ module.exports = async newOrder => {
         instrument.fresh -= newTrade.quantity
         instrument.floating += newTrade.quantity
         instrument.delta = newOrder.price - instrument.ltp
-        instrument.ltp = newOrder.price
+        instrument.ltp = newTrade.price
         await instrument.save()
 
         const blockDeltaBuyer = new BlockDelta({
@@ -118,7 +120,7 @@ module.exports = async newOrder => {
       return
     }
 
-    // limit buy
+    // float buy
     let matchingOrders = await Order.find({
       status: 'pending',
       transactionType: 'sell',
@@ -130,20 +132,28 @@ module.exports = async newOrder => {
         $ne: newOrder.user,
       },
     })
-      .populate(
-        'trades totalAmount averagePrice matchedQuantity unmatchedQuantity totalCommission finalAmount'
-      )
+      .populate('trades')
       .sort({ price: -1, createdAt: 1 })
 
     for (let candidateOrder of matchingOrders) {
       let qtyPending = newOrder.quantity - qtyMatched
+
+      const candidateMatchedQuantity = candidateOrder.trades.reduce(
+        (total, trade) => {
+          return total + trade.quantity
+        },
+        0
+      )
+
+      const candidateUnmatchedQuantity =
+        candidateOrder.quantity - candidateMatchedQuantity
 
       let newTrade = new Trade({
         buyer: newOrder.user,
         seller: candidateOrder.user,
         instrument: instrument._id,
         price: newOrder.price,
-        quantity: Math.min(qtyPending, candidateOrder.unmatchedQuantity),
+        quantity: Math.min(qtyPending, candidateUnmatchedQuantity),
       })
 
       newTrade.systemCommission = (newTrade.quantity * newTrade.price) / 100
@@ -165,7 +175,7 @@ module.exports = async newOrder => {
       }
 
       candidateOrder.trades.push(newTrade)
-      if (candidateOrder.unmatchedQuantity == newTrade.quantity) {
+      if (candidateUnmatchedQuantity == newTrade.quantity) {
         candidateOrder.status = 'executed'
       }
 
@@ -205,7 +215,7 @@ module.exports = async newOrder => {
       await holding.save()
 
       instrument.delta = newOrder.price - instrument.ltp
-      instrument.ltp = newOrder.price
+      instrument.ltp = newTrade.price
       await instrument.save()
 
       if (newOrder.status == 'executed') {
@@ -218,8 +228,10 @@ module.exports = async newOrder => {
     }
   }
 
-  // limit sell
   if (newOrder.transactionType == 'sell') {
+    // console.log('==> SELL')
+
+    // float sell
     let matchingOrders = await Order.find({
       status: 'pending',
       transactionType: 'buy',
@@ -231,38 +243,28 @@ module.exports = async newOrder => {
         $ne: newOrder.user,
       },
     })
-      .populate(
-        // 'trades'
-        'trades totalAmount averagePrice matchedQuantity unmatchedQuantity totalCommission finalAmount'
-      )
+      .populate('trades')
       .sort({ price: -1, createdAt: 1 })
-
-    // .select(`
-    // user
-    // instrument
-    // quantity
-    // price
-    // transactionType
-    // status
-    // type
-    // trades
-    // totalAmount
-    // averagePrice
-    // matchedQuantity
-    // unmatchedQuantity
-    // totalCommission
-    // finalAmount
-    // `)
 
     for (let candidateOrder of matchingOrders) {
       let qtyPending = newOrder.quantity - qtyMatched
+
+      const candidateMatchedQuantity = candidateOrder.trades.reduce(
+        (total, trade) => {
+          return total + trade.quantity
+        },
+        0
+      )
+
+      const candidateUnmatchedQuantity =
+        candidateOrder.quantity - candidateMatchedQuantity
 
       let newTrade = new Trade({
         seller: newOrder.user,
         buyer: candidateOrder.user,
         instrument: newOrder.instrument,
         price: candidateOrder.price,
-        quantity: Math.min(qtyPending, candidateOrder.unmatchedQuantity),
+        quantity: Math.min(qtyPending, candidateUnmatchedQuantity),
       })
 
       newTrade.systemCommission = (newTrade.quantity * newTrade.price) / 100
@@ -297,7 +299,7 @@ module.exports = async newOrder => {
       }
       candidateHolding.quantity += newTrade.quantity
 
-      if (candidateOrder.unmatchedQuantity == newTrade.quantity) {
+      if (candidateUnmatchedQuantity == newTrade.quantity) {
         candidateOrder.status = 'executed'
       }
 
@@ -337,7 +339,7 @@ module.exports = async newOrder => {
       await candidateOrder.save()
 
       instrument.delta = newOrder.price - instrument.ltp
-      instrument.ltp = newOrder.price
+      instrument.ltp = newTrade.price
       await instrument.save()
 
       if (newOrder.status == 'executed') {
