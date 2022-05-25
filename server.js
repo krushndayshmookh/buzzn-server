@@ -117,14 +117,18 @@ async function displayServerInfo() {
 const { Config } = require('./models')
 
 async function generateConfig() {
-  let config = await Config.findOne({ name: process.env.CONFIG_NAME })
-  if (!config) {
-    config = new Config({
-      name: process.env.CONFIG_NAME,
-      commission: 0,
-    })
-    await config.save()
-    console.log('Config generated.')
+  try {
+    let config = await Config.findOne({ name: process.env.CONFIG_NAME })
+    if (!config) {
+      config = new Config({
+        name: process.env.CONFIG_NAME,
+        commission: 0,
+      })
+      await config.save()
+      console.log('Config generated.')
+    }
+  } catch (err) {
+    console.error(err)
   }
 }
 
