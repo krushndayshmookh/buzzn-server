@@ -79,6 +79,14 @@ exports.register_post = async (req, res) => {
   }
 }
 
-exports.login_status_get = (req, res) => {
-  res.send({ success: true })
+exports.login_status_get = async (req, res) => {
+  const { _id } = req.decoded
+
+  const user = await User.findOne({ _id }).select('-password')
+
+  if (!user) {
+    return res.status(401).send({ success: false, message: 'Invalid user' })
+  }
+
+  return res.send({ success: true, user })
 }
