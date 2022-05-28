@@ -80,7 +80,7 @@ exports.register_post = async (req, res) => {
 }
 
 exports.login_status_get = async (req, res) => {
-  const { _id } = req.decoded
+  const { _id } = req.decoded.user
 
   const user = await User.findOne({ _id }).select('-password')
 
