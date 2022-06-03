@@ -28,7 +28,7 @@ async function run() {
     // reset User.chips
     await User.updateMany({}, { chips: 0 })
 
-    console.log('done')
+    console.info('done')
   } catch (err) {
     console.error(err)
   }

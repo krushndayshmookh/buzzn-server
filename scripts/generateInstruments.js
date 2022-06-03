@@ -28,8 +28,8 @@ async function run() {
       }
     }
 
-    console.log(`${count} instruments created`)
-    console.log('done')
+    console.info(`${count} instruments created`)
+    console.info('done')
   } catch (err) {
     console.error(err)
   }

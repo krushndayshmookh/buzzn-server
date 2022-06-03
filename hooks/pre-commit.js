@@ -13,21 +13,21 @@ const { exec } = require('./exec')
 
 //   if (!validBranchesRegex.test(branchName)) {
 //     const msg = `Branch names in this project must adhere to this contract: ${validBranchPrefix}.`
-//     console.log(chalk.bgRed.black.bold(msg))
+//     console.info(chalk.bgRed.black.bold(msg))
 //     process.exit(1)
 //   }
 // }
 
 exec('npm run prettify', { trim: true })
-console.log(chalk.green('Prettified!'))
+console.info(chalk.green('Prettified!'))
 
 const eslintOutput = exec('npm run lint', { trim: true })
 const lines = eslintOutput.split('\n')
 
 if (lines.length > 2) {
-  console.log(chalk.red('ESLint found problems!'))
-  console.log(eslintOutput)
+  console.info(chalk.red('ESLint found problems!'))
+  console.info(eslintOutput)
   process.exit(1)
 } else {
-  console.log(chalk.green('ESLint found no problems!'))
+  console.info(chalk.green('ESLint found no problems!'))
 }

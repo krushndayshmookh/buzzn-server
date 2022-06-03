@@ -17,8 +17,6 @@ async function run() {
     for (let post of posts) {
       const imageURL = post.content.image.content
 
-      console.log(imageURL)
-
       if (!imageURL || !imageURL.includes('https')) {
         await post.delete()
       } else if (!imageURL.includes('cdn')) {
@@ -34,8 +32,8 @@ async function run() {
       }
     }
 
-    console.log(`${count}/${posts.length} posts processed`)
-    console.log('done')
+    console.info(`${count}/${posts.length} posts processed`)
+    console.info('done')
   } catch (err) {
     console.error(err)
   }

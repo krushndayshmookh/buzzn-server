@@ -119,8 +119,6 @@ exports.placeOrder_post = async (req, res) => {
       return res.status(500).send({ err })
     }
 
-    // imeplement matching algorithm
-
     return res.send(newOrder)
   } catch (err) {
     console.error({ err })

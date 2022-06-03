@@ -2,8 +2,7 @@ const fs = require('fs')
 const path = require('path')
 
 const mkdirSync = dirpath => {
-  // console.log('Creating directories...')
-  // console.log(typeof dirpath)
+  // console.info('Creating directories...')
 
   try {
     if (typeof dirpath == 'string') makedirForReal(dirpath)
@@ -16,7 +15,6 @@ const mkdirSync = dirpath => {
 
 const makedirForReal = dir => {
   let dir_path = path.join(__dirname, '..', dir)
-  // console.log(dir_path)
 
   if (!fs.existsSync(dir_path)) {
     fs.mkdirSync(dir_path, {

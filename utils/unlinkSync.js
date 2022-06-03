@@ -11,7 +11,6 @@ const unlinkSync = filepath => {
 }
 
 const unlinkForReal = file => {
-  // console.log(file, fs.existsSync(file))
   if (fs.existsSync(file)) fs.unlinkSync(file)
 }
 

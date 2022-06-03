@@ -6,7 +6,7 @@ async function run() {
   try {
     // update pending payments to cancelled
     await Payment.updateMany({ status: 'pending' }, { status: 'cancelled' })
-    console.log('done')
+    console.info('done')
   } catch (err) {
     console.error(err)
   }

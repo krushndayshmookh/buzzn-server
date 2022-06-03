@@ -85,9 +85,9 @@ app.use(express.static(PUBLIC_DIR))
 // app.set('views', './views')
 
 // io.on('connection', client => {
-//   console.log('Client connected.')
+//   console.info('Client connected.')
 //   client.on('disconnect', () => {
-//     console.log('Client disconnected.')
+//     console.info('Client disconnected.')
 //   })
 // })
 
@@ -107,10 +107,10 @@ async function displayServerInfo() {
   const { name: dbName } = db
   const now = new Date()
 
-  console.log(`============================================================`)
-  console.log(`${name} v${serverVersion} - [${dbName}]`)
-  console.log(`Server started at ${now}`)
-  console.log(`============================================================`)
+  console.info(`============================================================`)
+  console.info(`${name} v${serverVersion} - [${dbName}]`)
+  console.info(`Server started at ${now}`)
+  console.info(`============================================================`)
 }
 
 // generate config if not exists
@@ -125,7 +125,7 @@ async function generateConfig() {
         commission: 0,
       })
       await config.save()
-      console.log('Config generated.')
+      console.info('Config generated.')
     }
   } catch (err) {
     console.error(err)
