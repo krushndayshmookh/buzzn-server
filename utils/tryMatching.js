@@ -23,6 +23,7 @@ module.exports = async newOrder => {
       instrument: instrument._id,
       user: newOrder.user,
       quantity: 0,
+      averagePrice: 0,
     })
   }
 
@@ -66,7 +67,11 @@ module.exports = async newOrder => {
         newOrder.trades.push(newTrade)
         await newOrder.save()
 
+        const existingPrice = holding.averagePrice
+        const existingValue = holding.quantity * existingPrice
+        const newValue = newTrade.quantity * newTrade.price
         holding.quantity += newTrade.quantity
+        holding.averagePrice = (existingValue + newValue) / holding.quantity
         await holding.save()
 
         instrument.fresh -= newTrade.quantity
@@ -159,11 +164,17 @@ module.exports = async newOrder => {
         totalSystemCommission += newTrade.systemCommission
 
         await newTrade.save()
+
         qtyMatched += newTrade.quantity
         amountMatched += newTrade.quantity * newTrade.price
 
         newOrder.trades.push(newTrade)
+        const existingPrice = holding.averagePrice
+        const existingValue = holding.quantity * existingPrice
+        const newValue = newTrade.quantity * newTrade.price
         holding.quantity += newTrade.quantity
+        holding.averagePrice = (existingValue + newValue) / holding.quantity
+        await holding.save()
 
         if (qtyMatched == newOrder.quantity) {
           newOrder.status = 'executed'
@@ -207,7 +218,6 @@ module.exports = async newOrder => {
           { $inc: { chips: amountMatched - totalTradeCommission } }
         )
         await candidateOrder.save()
-        await holding.save()
 
         instrument.delta = newTrade.price - instrument.ltp
         instrument.ltp = newTrade.price
@@ -284,9 +294,17 @@ module.exports = async newOrder => {
             instrument: instrument._id,
             user: candidateOrder.user,
             quantity: 0,
+            averagePrice: 0,
           })
         }
+
+        const existingPrice = candidateHolding.averagePrice
+        const existingValue = candidateHolding.quantity * existingPrice
+        const newValue = newTrade.quantity * newTrade.price
         candidateHolding.quantity += newTrade.quantity
+        candidateHolding.averagePrice =
+          (existingValue + newValue) / candidateHolding.quantity
+        await candidateHolding.save()
 
         if (candidateUnmatchedQuantity == newTrade.quantity) {
           candidateOrder.status = 'executed'
@@ -316,6 +334,7 @@ module.exports = async newOrder => {
         await blockDeltaSeller.save()
 
         await newOrder.save()
+
         await User.updateOne(
           { _id: newOrder.user },
           { $inc: { chips: amountMatched - totalTradeCommission } }
@@ -324,7 +343,6 @@ module.exports = async newOrder => {
           { _id: candidateOrder.user },
           { $inc: { chips: -amountMatched } }
         )
-        await candidateHolding.save()
         await candidateOrder.save()
 
         instrument.delta = newTrade.price - instrument.ltp
@@ -384,7 +402,11 @@ module.exports = async newOrder => {
           newOrder.trades.push(newTrade)
           await newOrder.save()
 
+          const existingPrice = holding.averagePrice
+          const existingValue = holding.quantity * existingPrice
+          const newValue = newTrade.quantity * newTrade.price
           holding.quantity += newTrade.quantity
+          holding.averagePrice = (existingValue + newValue) / holding.quantity
           await holding.save()
 
           instrument.fresh -= newTrade.quantity
@@ -485,7 +507,12 @@ module.exports = async newOrder => {
         amountMatched += newTrade.quantity * newTrade.price
 
         newOrder.trades.push(newTrade)
+        const existingPrice = holding.averagePrice
+        const existingValue = holding.quantity * existingPrice
+        const newValue = newTrade.quantity * newTrade.price
         holding.quantity += newTrade.quantity
+        holding.averagePrice = (existingValue + newValue) / holding.quantity
+        await holding.save()
 
         if (qtyMatched == newOrder.quantity) {
           newOrder.status = 'executed'
@@ -529,7 +556,6 @@ module.exports = async newOrder => {
           { $inc: { chips: amountMatched - totalTradeCommission } }
         )
         await candidateOrder.save()
-        await holding.save()
 
         instrument.delta = newTrade.price - instrument.ltp
         instrument.ltp = newTrade.price
@@ -614,7 +640,14 @@ module.exports = async newOrder => {
             quantity: 0,
           })
         }
+
+        const existingPrice = candidateHolding.averagePrice
+        const existingValue = candidateHolding.quantity * existingPrice
+        const newValue = newTrade.quantity * newTrade.price
         candidateHolding.quantity += newTrade.quantity
+        candidateHolding.averagePrice =
+          (existingValue + newValue) / candidateHolding.quantity
+        await candidateHolding.save()
 
         if (candidateUnmatchedQuantity == newTrade.quantity) {
           candidateOrder.status = 'executed'
@@ -652,7 +685,6 @@ module.exports = async newOrder => {
           { _id: candidateOrder.user },
           { $inc: { chips: -amountMatched } }
         )
-        await candidateHolding.save()
         await candidateOrder.save()
 
         instrument.delta = newTrade.price - instrument.ltp

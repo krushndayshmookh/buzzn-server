@@ -19,6 +19,9 @@ const HoldingSchema = new Schema(
       type: Number,
       required: true,
     },
+    averagePrice: {
+      type: Number,
+    },
   },
   {
     toJSON: {
