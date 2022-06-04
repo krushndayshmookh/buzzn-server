@@ -6,7 +6,7 @@ const JWTOptions = {
   expiresIn: process.env.JWT_EXPIRES,
   issuer: process.env.JWT_ISSUER,
 }
-const JWT_SECRET = process.env.JWT_SECRET
+const { JWT_SECRET } = process.env
 
 const generateToken = user => jwt.sign({ user }, JWT_SECRET, JWTOptions)
 
@@ -28,13 +28,15 @@ exports.login_post = async (req, res) => {
       }
 
       if (user.password === password) {
-        delete user.password
-        const token = generateToken(user)
+        const cleanUser = { ...user }
+        delete cleanUser.password
+
+        const token = generateToken(cleanUser)
 
         return res.send({
           success: true,
           token,
-          user,
+          cleanUser,
         })
       }
 
@@ -51,16 +53,16 @@ exports.login_post = async (req, res) => {
 exports.register_post = async (req, res) => {
   const { username, email, password } = req.body
 
-  let newUser = new User({
+  const newUser = new User({
     username,
     email,
     password,
   })
 
-  let newInstrument = new Instrument({
+  const newInstrument = new Instrument({
     user: newUser._id,
     minted: 0,
-    symbol: 'BLOCK-' + username,
+    symbol: `BLOCK-${username}`,
   })
 
   try {

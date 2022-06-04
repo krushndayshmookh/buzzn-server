@@ -14,15 +14,16 @@ const logger = require('morgan')
 const path = require('path')
 
 const http = require('http')
-
 // const socketIO = require('socket.io')
 
+const packageJSON = require('./package.json')
+
 const PORT = process.env.PORT || 3000
-const MONGODB_URI = process.env.MONGODB_URI
-const UPLOADS_DIR = process.env.UPLOADS_DIR
+const { MONGODB_URI } = process.env
+const { UPLOADS_DIR } = process.env
 const PUBLIC_DIR = path.join(__dirname, process.env.PUBLIC_DIR)
 
-let app = express()
+const app = express()
 
 const server = http.createServer(app)
 
@@ -40,7 +41,7 @@ mongoose.connect(MONGODB_URI, {
 })
 mongoose.Promise = global.Promise
 
-let db = mongoose.connection
+const db = mongoose.connection
 db.on('error', console.error.bind(console, 'MongoDB connection error:'))
 
 if (process.env.NODE_ENV === 'development') {
@@ -103,14 +104,14 @@ require('./utils/mkdirSync')(directories)
 
 // display server information on startup
 async function displayServerInfo() {
-  const { name, version: serverVersion } = require('./package.json')
+  const { name, version: serverVersion } = packageJSON
   const { name: dbName } = db
   const now = new Date()
 
-  console.info(`============================================================`)
+  console.info('============================================================')
   console.info(`${name} v${serverVersion} - [${dbName}]`)
   console.info(`Server started at ${now}`)
-  console.info(`============================================================`)
+  console.info('============================================================')
 }
 
 // generate config if not exists
@@ -136,5 +137,5 @@ generateConfig().then(displayServerInfo)
 
 server.listen(PORT, err => {
   if (err) throw err
-  console.info('Listening on port ' + PORT + '...')
+  console.info(`Listening on port ${PORT}...`)
 })

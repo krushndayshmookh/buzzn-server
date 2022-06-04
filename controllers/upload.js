@@ -3,7 +3,7 @@ const formidable = require('formidable')
 const aws = require('aws-sdk')
 const { v4: uuidv4 } = require('uuid')
 
-const S3_BUCKET = process.env.S3_BUCKET
+const { S3_BUCKET } = process.env
 aws.config.region = process.env.AWS_REGION
 
 const s3 = new aws.S3()
@@ -12,26 +12,32 @@ exports.upload_post = async (req, res) => {
   const form = formidable({ multiples: true })
   const fileExtRE = /(?:\.([^.]+))?$/
 
-  form.parse(req, async (err, fields, files) => {
+  form.parse(req, async (err, fields, incomingFiles) => {
     if (err) {
       console.error(err)
       return res.status(500).send(err)
     }
 
-    if (!Array.isArray(files)) files = [files.file]
+    let files
 
-    let uploaded = []
+    if (!Array.isArray(incomingFiles)) {
+      files = [incomingFiles.file]
+    } else {
+      files = [...incomingFiles]
+    }
+
+    const uploaded = []
 
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
 
-        let awsName = `original/${uuidv4()}.${
+        const awsName = `original/${uuidv4()}.${
           fileExtRE.exec(file.originalFilename)[1] || 'png'
         }`
         let awsPath = `https://${S3_BUCKET}.s3.amazonaws.com/${awsName}`
 
-        var params = {
+        const params = {
           Body: fs.readFileSync(file.filepath),
           Bucket: S3_BUCKET,
           Key: awsName,
@@ -40,17 +46,17 @@ exports.upload_post = async (req, res) => {
 
         let data
 
-        if (process.env.NODE_ENV != 'development') {
+        if (process.env.NODE_ENV !== 'development') {
           data = await s3.upload(params).promise()
         } else {
-          awsPath = '/uploads/' + awsName
+          awsPath = `/uploads/${awsName}`
 
-          await fs.ensureDirSync(__dirname + '/../public/uploads/original')
+          await fs.ensureDirSync(`${__dirname}/../public/uploads/original`)
           await fs.copyFileSync(
             file.filepath,
-            __dirname + '/../public' + awsPath
+            `${__dirname}/../public${awsPath}`
           )
-          awsPath = 'http://localhost:3000' + awsPath
+          awsPath = `http://localhost:3000${awsPath}`
         }
 
         uploaded.push({
@@ -60,9 +66,9 @@ exports.upload_post = async (req, res) => {
           data,
         })
       }
-    } catch (err) {
-      console.error(err)
-      return res.status(500).send(err)
+    } catch (uploadErr) {
+      console.error(uploadErr)
+      return res.status(500).send(uploadErr)
     }
 
     return res.send(uploaded)
@@ -72,7 +78,7 @@ exports.upload_post = async (req, res) => {
 exports.upload_delete = (req, res) => {
   const { filename } = req.params
 
-  var params = {
+  const params = {
     Bucket: S3_BUCKET,
     Key: filename,
   }
@@ -80,10 +86,8 @@ exports.upload_delete = (req, res) => {
   s3.deleteObject(params)
     .promise()
     .then(
-      function (data) {
-        return res.send({ deleted: filename, data })
-      },
-      function (err) {
+      data => res.send({ deleted: filename, data }),
+      err => {
         console.error(err)
         return res.status(500).send(err)
       }

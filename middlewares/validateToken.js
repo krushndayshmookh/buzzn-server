@@ -34,7 +34,7 @@ const validateToken = (req, res, next) => {
     }
   } else {
     result = {
-      error: `Authentication error. Token required.`,
+      error: 'Authentication error. Token required.',
       status: 401,
     }
     res.status(401).send(result)

@@ -6,7 +6,7 @@ exports.checkUsernameAvailability = (req, res) => {
   User.findOne({ username })
     .then(doc => {
       if (doc) return res.send(false)
-      else return res.send(true)
+      return res.send(true)
     })
     .catch(err => {
       console.error({ err })
@@ -20,7 +20,7 @@ exports.checkEmailAvailability = (req, res) => {
   User.findOne({ email })
     .then(doc => {
       if (doc) return res.send(false)
-      else return res.send(true)
+      return res.send(true)
     })
     .catch(err => {
       console.error({ err })

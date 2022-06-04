@@ -1,7 +1,8 @@
+/* eslint-disable func-names */
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
 
-const Schema = mongoose.Schema
+const { Schema } = mongoose
 
 const OrderSchema = new Schema(
   {
@@ -59,9 +60,10 @@ OrderSchema.virtual('totalAmount').get(function () {
   if (!this.trades || this.trades.length === 0) {
     return 0
   }
-  const totalAmount = this.trades.reduce((total, trade) => {
-    return total + trade.price * trade.quantity
-  }, 0)
+  const totalAmount = this.trades.reduce(
+    (total, trade) => total + trade.price * trade.quantity,
+    0
+  )
   return totalAmount
 })
 
@@ -76,9 +78,7 @@ OrderSchema.virtual('matchedQuantity').get(function () {
   if (!this.trades || this.trades.length === 0) {
     return 0
   }
-  const qty = this.trades.reduce((total, trade) => {
-    return total + trade.quantity
-  }, 0)
+  const qty = this.trades.reduce((total, trade) => total + trade.quantity, 0)
   return qty
 })
 
@@ -93,9 +93,10 @@ OrderSchema.virtual('totalCommission').get(function () {
   if (!this.trades || this.trades.length === 0) {
     return 0
   }
-  const totalCommission = this.trades.reduce((total, trade) => {
-    return total + trade.ownerCommission + trade.systemCommission
-  }, 0)
+  const totalCommission = this.trades.reduce(
+    (total, trade) => total + trade.ownerCommission + trade.systemCommission,
+    0
+  )
   return totalCommission
 })
 

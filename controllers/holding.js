@@ -5,11 +5,11 @@ exports.holdings_get = async (req, res) => {
 
   const { instrument } = req.query
 
-  let query = {
+  const query = {
     user: user._id,
   }
 
-  let populate = [
+  const populate = [
     {
       path: 'instrument',
       select: 'symbol ltp',
@@ -25,9 +25,9 @@ exports.holdings_get = async (req, res) => {
   if (instrument) query.instrument = instrument
 
   try {
-    let holdings = await Holding.find(query).populate(populate).lean()
+    const holdings = await Holding.find(query).populate(populate).lean()
 
-    res.send(holdings)
+    return res.send(holdings)
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
@@ -37,30 +37,30 @@ exports.holdings_get = async (req, res) => {
 exports.holders_get = async (req, res) => {
   const { user } = req.decoded
 
-  let instrument = await Instrument.findOne({ user: user._id })
+  const instrument = await Instrument.findOne({ user: user._id })
 
-  let query = {
+  const query = {
     instrument: instrument._id,
   }
 
-  let populate = [
+  const populate = [
     {
       path: 'user',
       select: 'username avatar',
     },
   ]
 
-  let sort = {
+  const sort = {
     quantity: -1,
   }
 
   try {
-    let holdings = await Holding.find(query)
+    const holdings = await Holding.find(query)
       .sort(sort)
       .populate(populate)
       .lean()
 
-    res.send(holdings)
+    return res.send(holdings)
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })

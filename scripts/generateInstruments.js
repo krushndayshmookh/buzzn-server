@@ -11,7 +11,9 @@ async function run() {
     let count = 0
 
     // loop over each user and check existence of instrument
-    for (let user of users) {
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i]
+
       const instrument = await Instrument.findOne({ user: user._id })
 
       // if not, create instrument
@@ -19,7 +21,7 @@ async function run() {
         const newInstrument = new Instrument({
           user: user._id,
           minted: 0,
-          symbol: 'BLOCK-' + user.username,
+          symbol: `BLOCK-${user.username}`,
         })
 
         await newInstrument.save()

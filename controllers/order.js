@@ -5,15 +5,15 @@ exports.fetchOrders_get = async (req, res) => {
   const { user } = req.decoded
   const { page, limit } = req.body
 
-  let query = {
+  const query = {
     user: user._id,
   }
 
-  let sort = {
+  const sort = {
     createdAt: -1,
   }
 
-  let populate = [
+  const populate = [
     {
       path: 'instrument',
       select: 'symbol user',
@@ -29,9 +29,9 @@ exports.fetchOrders_get = async (req, res) => {
     },
   ]
 
-  let options = {
-    page: parseInt(page) || 1,
-    limit: parseInt(limit) || 10,
+  const options = {
+    page: parseInt(page, 10) || 1,
+    limit: parseInt(limit, 10) || 10,
     sort,
     populate,
   }
@@ -52,25 +52,20 @@ exports.fetchOrders_get = async (req, res) => {
 
 exports.placeOrder_post = async (req, res) => {
   const { user } = req.decoded
-  let {
-    transactionType,
-    instrument: instrumentId,
-    quantity,
-    price,
-    type,
-  } = req.body
+  const { transactionType, instrument: instrumentId, type } = req.body
+  let { quantity, price } = req.body
 
   quantity = parseFloat(quantity)
   price = parseFloat(price)
 
   try {
-    let instrument = await Instrument.findById(instrumentId)
+    const instrument = await Instrument.findById(instrumentId)
 
     if (!instrument) {
       return res.status(404).send('Instrument not found')
     }
 
-    let holding = await Holding.findOne({
+    const holding = await Holding.findOne({
       instrument: instrumentId,
       user: user._id,
     })
@@ -80,34 +75,34 @@ exports.placeOrder_post = async (req, res) => {
     const availableToBuy =
       instrument.floating + instrument.fresh - availableToSell
 
-    if (transactionType == 'buy') {
+    if (transactionType === 'buy') {
       if (quantity > availableToBuy) {
         return res.status(400).send('Invalid quantity')
       }
 
-      let amount = quantity * price
+      const amount = quantity * price
       if (amount > user.chips) {
         return res.status(400).send('Insufficient balance')
       }
     }
 
-    if (transactionType == 'sell') {
+    if (transactionType === 'sell') {
       if (quantity > availableToSell) {
         return res.status(400).send('Invalid quantity')
       }
     }
 
-    let newOrder = new Order({
+    const newOrder = new Order({
       user: user._id,
       instrument: instrumentId,
       quantity,
-      price: type == 'market' ? instrument.ltp : price,
+      price: type === 'market' ? instrument.ltp : price,
       transactionType,
       type,
     })
 
     await newOrder.save()
-    if (transactionType == 'sell') {
+    if (transactionType === 'sell') {
       holding.quantity -= quantity
       await holding.save()
     }
@@ -131,22 +126,22 @@ exports.cancelOrder_delete = async (req, res) => {
   const { orderId } = req.params
 
   try {
-    let order = await Order.findById(orderId)
+    const order = await Order.findById(orderId)
 
     if (!order) {
       return res.status(404).send('Order not found')
     }
 
-    if (order.user != user._id) {
+    if (order.user !== user._id) {
       return res.status(403).send('Access denied')
     }
 
-    if (order.status == 'pending') {
+    if (order.status === 'pending') {
       order.status = 'cancelled'
       await order.save()
 
-      if (order.transactionType == 'sell') {
-        let holding = await Holding.findOne({
+      if (order.transactionType === 'sell') {
+        const holding = await Holding.findOne({
           instrument: order.instrument,
           user: user._id,
         })

@@ -8,10 +8,11 @@ const {
   Config,
 } = require('../models')
 
-module.exports = async newOrder => {
+module.exports = async order => {
+  const newOrder = { ...order }
   let qtyMatched = 0
   let amountMatched = 0
-  let instrument = await Instrument.findById(newOrder.instrument)
+  const instrument = await Instrument.findById(newOrder.instrument)
   let holding = await Holding.findOne({
     instrument: instrument._id,
     user: newOrder.user,
@@ -28,11 +29,11 @@ module.exports = async newOrder => {
   }
 
   if (newOrder.type === 'market') {
-    if (newOrder.transactionType == 'buy') {
+    if (newOrder.transactionType === 'buy') {
       if (instrument.fresh) {
         // fresh buy
 
-        let newTrade = new Trade({
+        const newTrade = new Trade({
           buyer: newOrder.user,
           seller: instrument.user,
           instrument: instrument._id,
@@ -42,12 +43,12 @@ module.exports = async newOrder => {
         })
 
         newTrade.systemCommission = (newTrade.quantity * newTrade.price) / 100
-        let totalCommission =
+        const totalCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
         totalSystemCommission += newTrade.systemCommission
 
-        let freshOrder = new Order({
+        const freshOrder = new Order({
           user: instrument.user,
           instrument: instrument._id,
           quantity: newTrade.quantity,
@@ -113,7 +114,7 @@ module.exports = async newOrder => {
         )
       }
 
-      if (qtyMatched == newOrder.quantity) {
+      if (qtyMatched === newOrder.quantity) {
         newOrder.status = 'executed'
         await newOrder.save()
         await Config.updateOne(
@@ -124,7 +125,7 @@ module.exports = async newOrder => {
       }
 
       // float buy
-      let matchingOrders = await Order.find({
+      const matchingOrders = await Order.find({
         status: 'pending',
         transactionType: 'sell',
         instrument: newOrder.instrument,
@@ -135,20 +136,20 @@ module.exports = async newOrder => {
         .populate('trades')
         .sort({ price: -1, createdAt: 1 })
 
-      for (let candidateOrder of matchingOrders) {
-        let qtyPending = newOrder.quantity - qtyMatched
+      for (let i = 0; i < matchingOrders.length; i++) {
+        const candidateOrder = matchingOrders[i]
+
+        const qtyPending = newOrder.quantity - qtyMatched
 
         const candidateMatchedQuantity = candidateOrder.trades.reduce(
-          (total, trade) => {
-            return total + trade.quantity
-          },
+          (total, trade) => total + trade.quantity,
           0
         )
 
         const candidateUnmatchedQuantity =
           candidateOrder.quantity - candidateMatchedQuantity
 
-        let newTrade = new Trade({
+        const newTrade = new Trade({
           buyer: newOrder.user,
           seller: candidateOrder.user,
           instrument: instrument._id,
@@ -158,7 +159,7 @@ module.exports = async newOrder => {
 
         newTrade.systemCommission = (newTrade.quantity * newTrade.price) / 100
         newTrade.ownerCommission = (newTrade.quantity * newTrade.price) / 100
-        let totalTradeCommission =
+        const totalTradeCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
         totalSystemCommission += newTrade.systemCommission
@@ -176,12 +177,12 @@ module.exports = async newOrder => {
         holding.averagePrice = (existingValue + newValue) / holding.quantity
         await holding.save()
 
-        if (qtyMatched == newOrder.quantity) {
+        if (qtyMatched === newOrder.quantity) {
           newOrder.status = 'executed'
         }
 
         candidateOrder.trades.push(newTrade)
-        if (candidateUnmatchedQuantity == newTrade.quantity) {
+        if (candidateUnmatchedQuantity === newTrade.quantity) {
           candidateOrder.status = 'executed'
         }
 
@@ -223,7 +224,7 @@ module.exports = async newOrder => {
         instrument.ltp = newTrade.price
         await instrument.save()
 
-        if (newOrder.status == 'executed') {
+        if (newOrder.status === 'executed') {
           await Config.updateOne(
             { name: process.env.CONFIG_NAME },
             { $inc: { systemCommission: totalSystemCommission } }
@@ -233,8 +234,8 @@ module.exports = async newOrder => {
       }
     }
 
-    if (newOrder.transactionType == 'sell') {
-      let matchingOrders = await Order.find({
+    if (newOrder.transactionType === 'sell') {
+      const matchingOrders = await Order.find({
         status: 'pending',
         transactionType: 'buy',
         instrument: instrument._id,
@@ -245,20 +246,20 @@ module.exports = async newOrder => {
         .populate('trades')
         .sort({ price: -1, createdAt: 1 })
 
-      for (let candidateOrder of matchingOrders) {
-        let qtyPending = newOrder.quantity - qtyMatched
+      for (let i = 0; i < matchingOrders.length; i++) {
+        const candidateOrder = matchingOrders[i]
+
+        const qtyPending = newOrder.quantity - qtyMatched
 
         const candidateMatchedQuantity = candidateOrder.trades.reduce(
-          (total, trade) => {
-            return total + trade.quantity
-          },
+          (total, trade) => total + trade.quantity,
           0
         )
 
         const candidateUnmatchedQuantity =
           candidateOrder.quantity - candidateMatchedQuantity
 
-        let newTrade = new Trade({
+        const newTrade = new Trade({
           seller: newOrder.user,
           buyer: candidateOrder.user,
           instrument: newOrder.instrument,
@@ -268,7 +269,7 @@ module.exports = async newOrder => {
 
         newTrade.systemCommission = (newTrade.quantity * newTrade.price) / 100
         newTrade.ownerCommission = (newTrade.quantity * newTrade.price) / 100
-        let totalTradeCommission =
+        const totalTradeCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
         totalSystemCommission += newTrade.systemCommission
@@ -279,7 +280,7 @@ module.exports = async newOrder => {
 
         newOrder.trades.push(newTrade)
 
-        if (qtyMatched == newOrder.quantity) {
+        if (qtyMatched === newOrder.quantity) {
           newOrder.status = 'executed'
         }
 
@@ -306,7 +307,7 @@ module.exports = async newOrder => {
           (existingValue + newValue) / candidateHolding.quantity
         await candidateHolding.save()
 
-        if (candidateUnmatchedQuantity == newTrade.quantity) {
+        if (candidateUnmatchedQuantity === newTrade.quantity) {
           candidateOrder.status = 'executed'
         }
 
@@ -349,7 +350,7 @@ module.exports = async newOrder => {
         instrument.ltp = newTrade.price
         await instrument.save()
 
-        if (newOrder.status == 'executed') {
+        if (newOrder.status === 'executed') {
           await Config.updateOne(
             { name: process.env.CONFIG_NAME },
             { $inc: { systemCommission: totalSystemCommission } }
@@ -361,13 +362,13 @@ module.exports = async newOrder => {
   }
 
   if (newOrder.type === 'limit') {
-    if (newOrder.transactionType == 'buy') {
+    if (newOrder.transactionType === 'buy') {
       // console.info('==> BUY')
 
       if (instrument.fresh) {
         // fresh buy
         if (newOrder.price >= instrument.ltp) {
-          let newTrade = new Trade({
+          const newTrade = new Trade({
             buyer: newOrder.user,
             seller: instrument.user,
             instrument: instrument._id,
@@ -377,12 +378,12 @@ module.exports = async newOrder => {
           })
 
           newTrade.systemCommission = (newTrade.quantity * newTrade.price) / 100
-          let totalCommission =
+          const totalCommission =
             newTrade.systemCommission + newTrade.ownerCommission
 
           totalSystemCommission += newTrade.systemCommission
 
-          let freshOrder = new Order({
+          const freshOrder = new Order({
             user: instrument.user,
             instrument: instrument._id,
             quantity: newTrade.quantity,
@@ -449,7 +450,7 @@ module.exports = async newOrder => {
         }
       }
 
-      if (qtyMatched == newOrder.quantity) {
+      if (qtyMatched === newOrder.quantity) {
         newOrder.status = 'executed'
         await newOrder.save()
         await Config.updateOne(
@@ -460,7 +461,7 @@ module.exports = async newOrder => {
       }
 
       // float buy
-      let matchingOrders = await Order.find({
+      const matchingOrders = await Order.find({
         status: 'pending',
         transactionType: 'sell',
         instrument: newOrder.instrument,
@@ -474,20 +475,20 @@ module.exports = async newOrder => {
         .populate('trades')
         .sort({ price: -1, createdAt: 1 })
 
-      for (let candidateOrder of matchingOrders) {
-        let qtyPending = newOrder.quantity - qtyMatched
+      for (let i = 0; i < matchingOrders.length; i++) {
+        const candidateOrder = matchingOrders[i]
+
+        const qtyPending = newOrder.quantity - qtyMatched
 
         const candidateMatchedQuantity = candidateOrder.trades.reduce(
-          (total, trade) => {
-            return total + trade.quantity
-          },
+          (total, trade) => total + trade.quantity,
           0
         )
 
         const candidateUnmatchedQuantity =
           candidateOrder.quantity - candidateMatchedQuantity
 
-        let newTrade = new Trade({
+        const newTrade = new Trade({
           buyer: newOrder.user,
           seller: candidateOrder.user,
           instrument: instrument._id,
@@ -497,7 +498,7 @@ module.exports = async newOrder => {
 
         newTrade.systemCommission = (newTrade.quantity * newTrade.price) / 100
         newTrade.ownerCommission = (newTrade.quantity * newTrade.price) / 100
-        let totalTradeCommission =
+        const totalTradeCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
         totalSystemCommission += newTrade.systemCommission
@@ -514,12 +515,12 @@ module.exports = async newOrder => {
         holding.averagePrice = (existingValue + newValue) / holding.quantity
         await holding.save()
 
-        if (qtyMatched == newOrder.quantity) {
+        if (qtyMatched === newOrder.quantity) {
           newOrder.status = 'executed'
         }
 
         candidateOrder.trades.push(newTrade)
-        if (candidateUnmatchedQuantity == newTrade.quantity) {
+        if (candidateUnmatchedQuantity === newTrade.quantity) {
           candidateOrder.status = 'executed'
         }
 
@@ -561,7 +562,7 @@ module.exports = async newOrder => {
         instrument.ltp = newTrade.price
         await instrument.save()
 
-        if (newOrder.status == 'executed') {
+        if (newOrder.status === 'executed') {
           await Config.updateOne(
             { name: process.env.CONFIG_NAME },
             { $inc: { systemCommission: totalSystemCommission } }
@@ -571,11 +572,11 @@ module.exports = async newOrder => {
       }
     }
 
-    if (newOrder.transactionType == 'sell') {
+    if (newOrder.transactionType === 'sell') {
       // console.info('==> SELL')
 
       // float sell
-      let matchingOrders = await Order.find({
+      const matchingOrders = await Order.find({
         status: 'pending',
         transactionType: 'buy',
         instrument: instrument._id,
@@ -589,20 +590,20 @@ module.exports = async newOrder => {
         .populate('trades')
         .sort({ price: -1, createdAt: 1 })
 
-      for (let candidateOrder of matchingOrders) {
-        let qtyPending = newOrder.quantity - qtyMatched
+      for (let i = 0; i < matchingOrders.length; i++) {
+        const candidateOrder = matchingOrders[i]
+
+        const qtyPending = newOrder.quantity - qtyMatched
 
         const candidateMatchedQuantity = candidateOrder.trades.reduce(
-          (total, trade) => {
-            return total + trade.quantity
-          },
+          (total, trade) => total + trade.quantity,
           0
         )
 
         const candidateUnmatchedQuantity =
           candidateOrder.quantity - candidateMatchedQuantity
 
-        let newTrade = new Trade({
+        const newTrade = new Trade({
           seller: newOrder.user,
           buyer: candidateOrder.user,
           instrument: newOrder.instrument,
@@ -612,7 +613,7 @@ module.exports = async newOrder => {
 
         newTrade.systemCommission = (newTrade.quantity * newTrade.price) / 100
         newTrade.ownerCommission = (newTrade.quantity * newTrade.price) / 100
-        let totalTradeCommission =
+        const totalTradeCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
         totalSystemCommission += newTrade.systemCommission
@@ -623,7 +624,7 @@ module.exports = async newOrder => {
 
         newOrder.trades.push(newTrade)
 
-        if (qtyMatched == newOrder.quantity) {
+        if (qtyMatched === newOrder.quantity) {
           newOrder.status = 'executed'
         }
 
@@ -649,7 +650,7 @@ module.exports = async newOrder => {
           (existingValue + newValue) / candidateHolding.quantity
         await candidateHolding.save()
 
-        if (candidateUnmatchedQuantity == newTrade.quantity) {
+        if (candidateUnmatchedQuantity === newTrade.quantity) {
           candidateOrder.status = 'executed'
         }
 
@@ -691,7 +692,7 @@ module.exports = async newOrder => {
         instrument.ltp = newTrade.price
         await instrument.save()
 
-        if (newOrder.status == 'executed') {
+        if (newOrder.status === 'executed') {
           await Config.updateOne(
             { name: process.env.CONFIG_NAME },
             { $inc: { systemCommission: totalSystemCommission } }

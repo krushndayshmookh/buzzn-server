@@ -9,13 +9,13 @@ exports.checkout_post = async (req, res) => {
   let { quantity } = req.body
 
   quantity = parseFloat(quantity)
-  let price = CHIP_PRICE.INR
+  const price = CHIP_PRICE.INR
 
   try {
     const priceInPaise = price * 100
     const amount = priceInPaise * quantity
 
-    let payment = new Payment({
+    const payment = new Payment({
       user: user._id,
       quantity,
       price,
@@ -24,7 +24,7 @@ exports.checkout_post = async (req, res) => {
     })
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount,
+      amount,
       currency: 'inr',
       automatic_payment_methods: { enabled: true },
     })
@@ -42,12 +42,13 @@ exports.checkout_post = async (req, res) => {
 
 exports.validate_post = async (req, res) => {
   const { user } = req.decoded
+  // eslint-disable-next-line camelcase
   const { payment_intent } = req.body
 
   try {
     const paymentIntent = await stripe.paymentIntents.retrieve(payment_intent)
 
-    let payment = await Payment.findOne({
+    const payment = await Payment.findOne({
       paymentIntent: paymentIntent.id,
       user: user._id,
       status: 'pending',
@@ -65,13 +66,13 @@ exports.validate_post = async (req, res) => {
         { $inc: { chips: payment.quantity } }
       )
       return res.json({ success: true })
-    } else if (paymentIntent.status === 'canceled') {
+    }
+    if (paymentIntent.status === 'canceled') {
       payment.status = 'cancelled'
       await payment.save()
       return res.json({ success: false })
-    } else {
-      return res.json({ success: false })
     }
+    return res.json({ success: false })
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })

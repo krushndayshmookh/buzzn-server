@@ -13,7 +13,7 @@ async function performDatabaseUpdate(operation) {
   })
   mongoose.Promise = global.Promise
 
-  let db = mongoose.connection
+  const db = mongoose.connection
   db.on('error', console.error.bind(console, 'MongoDB connection error:'))
 
   try {

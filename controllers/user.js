@@ -5,22 +5,22 @@ const { generateToken } = require('./auth')
 exports.list_get = async (req, res) => {
   const { type } = req.query
 
-  let query = {}
+  const query = {}
 
   if (type) {
     query.type = type
   }
 
-  let select = 'avatar username firstName lastName isVerified'
+  const select = 'avatar username firstName lastName isVerified'
 
-  let populate = ''
+  const populate = ''
 
-  let sort = {
+  const sort = {
     username: 1,
   }
 
   try {
-    let users = await User.find(query)
+    const users = await User.find(query)
       .select(select)
       .collation({ locale: 'en' })
       .sort(sort)
@@ -37,12 +37,12 @@ exports.list_get = async (req, res) => {
 exports.byUsername_get = async (req, res) => {
   const { username } = req.params
 
-  let query = {
+  const query = {
     username,
   }
 
   try {
-    let user = await User.findOne(query)
+    const user = await User.findOne(query)
       .select('username firstName lastName bio avatar categories isVerified')
       .populate('followersCount followingCount')
     // .lean({ virtuals: true })
@@ -57,12 +57,12 @@ exports.byUsername_get = async (req, res) => {
 exports.details_get = async (req, res) => {
   const { userId } = req.params
 
-  let query = {
+  const query = {
     _id: userId,
   }
 
   try {
-    let user = await User.findOne(query)
+    const user = await User.findOne(query)
       .select('username firstName lastName bio avatar categories isVerified')
       .lean()
 
@@ -76,12 +76,12 @@ exports.details_get = async (req, res) => {
 exports.profile_get = async (req, res) => {
   const { user } = req.decoded
 
-  let query = {
+  const query = {
     _id: user._id,
   }
 
   try {
-    let existingUser = await User.findOne(query)
+    const existingUser = await User.findOne(query)
       .select(
         'username firstName lastName bio avatar categories isVerified chips'
       )
@@ -93,7 +93,7 @@ exports.profile_get = async (req, res) => {
       })
     }
 
-    let token = generateToken(existingUser)
+    const token = generateToken(existingUser)
 
     return res.send({ user: existingUser, token })
   } catch (err) {
@@ -105,7 +105,7 @@ exports.profile_get = async (req, res) => {
 exports.create_post = async (req, res) => {
   const { name, email, password, type } = req.body
 
-  let newUser = new User({
+  const newUser = new User({
     name,
     email,
     password,
@@ -127,7 +127,7 @@ exports.update_put = async (req, res) => {
 
   const { username, firstName, lastName, bio, avatar } = req.body
 
-  let updates = {
+  const updates = {
     username,
     firstName,
     lastName,
@@ -143,7 +143,7 @@ exports.update_put = async (req, res) => {
       updates
     )
 
-    res.send({ success: true })
+    return res.send({ success: true })
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
@@ -169,10 +169,10 @@ exports.delete_delete = async (req, res) => {
 }
 
 exports.followers_get = async (req, res) => {
-  let { username } = req.params
+  const { username } = req.params
 
   try {
-    let user = await User.findOne({ username })
+    const user = await User.findOne({ username })
 
     if (!user) {
       return res.status(404).send({
@@ -180,24 +180,27 @@ exports.followers_get = async (req, res) => {
       })
     }
 
-    let query = {
+    const query = {
       user: user._id,
     }
 
-    let populate = [
+    const populate = [
       {
         path: 'follower',
         select: 'username avatar isVerified',
       },
     ]
 
-    let sort = {
+    const sort = {
       'follower.username': 1,
     }
 
-    let result = await Follower.find(query).populate(populate).sort(sort).lean()
+    const result = await Follower.find(query)
+      .populate(populate)
+      .sort(sort)
+      .lean()
 
-    let followers = result.map(f => f.follower)
+    const followers = result.map(f => f.follower)
 
     return res.send(followers)
   } catch (err) {
@@ -207,10 +210,10 @@ exports.followers_get = async (req, res) => {
 }
 
 exports.following_get = async (req, res) => {
-  let { username } = req.params
+  const { username } = req.params
 
   try {
-    let user = await User.findOne({ username })
+    const user = await User.findOne({ username })
 
     if (!user) {
       return res.status(404).send({
@@ -218,24 +221,27 @@ exports.following_get = async (req, res) => {
       })
     }
 
-    let query = {
+    const query = {
       follower: user._id,
     }
 
-    let populate = [
+    const populate = [
       {
         path: 'user',
         select: 'username avatar isVerified',
       },
     ]
 
-    let sort = {
+    const sort = {
       'user.username': 1,
     }
 
-    let result = await Follower.find(query).populate(populate).sort(sort).lean()
+    const result = await Follower.find(query)
+      .populate(populate)
+      .sort(sort)
+      .lean()
 
-    let following = result.map(f => f.user)
+    const following = result.map(f => f.user)
 
     return res.send(following)
   } catch (err) {
@@ -245,20 +251,20 @@ exports.following_get = async (req, res) => {
 }
 
 exports.isFollowing_get = async (req, res) => {
-  let { user } = req.decoded
-  let { userId } = req.params
+  const { user } = req.decoded
+  const { userId } = req.params
 
-  if (user._id == userId) {
+  if (user._id === userId) {
     return res.send({ isFollowing: true })
   }
 
   try {
-    let result = await Follower.findOne({
+    const result = await Follower.findOne({
       user: userId,
       follower: user._id,
     })
 
-    let isFollowing = !!result
+    const isFollowing = !!result
 
     return res.send({ isFollowing })
   } catch (err) {
@@ -268,8 +274,8 @@ exports.isFollowing_get = async (req, res) => {
 }
 
 exports.follower_put = async (req, res) => {
-  let { user } = req.decoded
-  let { userId } = req.params
+  const { user } = req.decoded
+  const { userId } = req.params
 
   try {
     const userToFollow = await User.findById(userId)
@@ -291,7 +297,7 @@ exports.follower_put = async (req, res) => {
       })
     }
 
-    let newFollower = new Follower({
+    const newFollower = new Follower({
       user: userId,
       follower: user._id,
     })
@@ -306,11 +312,11 @@ exports.follower_put = async (req, res) => {
 }
 
 exports.follower_delete = async (req, res) => {
-  let { user } = req.decoded
-  let { userId } = req.params
+  const { user } = req.decoded
+  const { userId } = req.params
 
   try {
-    let follower = await Follower.findOne({
+    const follower = await Follower.findOne({
       user: userId,
       follower: user._id,
     })
@@ -333,12 +339,12 @@ exports.follower_delete = async (req, res) => {
 exports.user_instrument_get = async (req, res) => {
   const { userId } = req.params
 
-  let query = {
+  const query = {
     user: userId,
   }
 
   try {
-    let instrument = await Instrument.findOne(query).lean()
+    const instrument = await Instrument.findOne(query).lean()
 
     return res.send(instrument)
   } catch (err) {
@@ -351,7 +357,7 @@ exports.user_watchlist_post = async (req, res) => {
   const { user } = req.decoded
   const { instrument } = req.body
 
-  let userInstrument = new Watchlist({
+  const userInstrument = new Watchlist({
     user: user._id,
     instrument,
   })
@@ -369,11 +375,11 @@ exports.user_watchlist_post = async (req, res) => {
 exports.user_watchlist_get = async (req, res) => {
   const { user } = req.decoded
 
-  let query = {
+  const query = {
     user: user._id,
   }
 
-  let populate = [
+  const populate = [
     {
       path: 'instrument',
       populate: [
@@ -386,9 +392,11 @@ exports.user_watchlist_get = async (req, res) => {
   ]
 
   try {
-    let userInstruments = await Watchlist.find(query).populate(populate).lean()
+    const userInstruments = await Watchlist.find(query)
+      .populate(populate)
+      .lean()
 
-    let instruments = userInstruments
+    const instruments = userInstruments
       .map(i => i.instrument)
       .sort((a, b) => stringSort(a.user.username, b.user.username, false))
 
@@ -400,16 +408,16 @@ exports.user_watchlist_get = async (req, res) => {
 }
 
 exports.user_isWatching_get = async (req, res) => {
-  let { user } = req.decoded
+  const { user } = req.decoded
   const { instrument } = req.query
 
   try {
-    let result = await Watchlist.findOne({
+    const result = await Watchlist.findOne({
       user: user._id,
-      instrument: instrument,
+      instrument,
     })
 
-    let isWatching = !!result
+    const isWatching = !!result
 
     return res.send({ isWatching })
   } catch (err) {
@@ -422,13 +430,13 @@ exports.user_watchlist_delete = async (req, res) => {
   const { user } = req.decoded
   const { instrumentId } = req.params
 
-  let query = {
+  const query = {
     user: user._id,
     instrument: instrumentId,
   }
 
   try {
-    let result = await Watchlist.deleteOne(query)
+    const result = await Watchlist.deleteOne(query)
 
     return res.send(result)
   } catch (err) {

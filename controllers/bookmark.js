@@ -4,13 +4,13 @@ exports.fetch_get = async (req, res) => {
   const { user } = req.decoded
   const { page, limit } = req.query
 
-  let query = {
+  const query = {
     user: user._id,
   }
 
-  let options = {
-    page: parseInt(page) || 1,
-    limit: parseInt(limit) || 10,
+  const options = {
+    page: parseInt(page, 10) || 1,
+    limit: parseInt(limit, 10) || 10,
     sort: {
       createdAt: -1,
     },

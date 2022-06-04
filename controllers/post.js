@@ -1,3 +1,5 @@
+const axios = require('axios')
+
 const {
   Post,
   Instrument,
@@ -8,14 +10,13 @@ const {
 } = require('../models')
 
 const BLOCK_COUNTS = require('../configs/PostTypeBlockCounts')
-const PROCESSING_SERVER_URL = process.env.PROCESSING_SERVER_URL
 
-const axios = require('axios')
+const { PROCESSING_SERVER_URL } = process.env
 
 exports.fetch_get = async (req, res) => {
   const { page, limit, user, type } = req.query
 
-  let query = {
+  const query = {
     isDeleted: false,
   }
 
@@ -27,11 +28,11 @@ exports.fetch_get = async (req, res) => {
     query.user = user
   }
 
-  let sort = {
+  const sort = {
     createdAt: -1,
   }
 
-  let populate = [
+  const populate = [
     {
       path: 'user',
       select: 'username avatar isVerified',
@@ -49,8 +50,8 @@ exports.fetch_get = async (req, res) => {
 
     if (page && limit) {
       posts = await Post.paginate(query, {
-        page: parseInt(page) || 1,
-        limit: parseInt(limit) || 100,
+        page: parseInt(page, 10) || 1,
+        limit: parseInt(limit, 10) || 100,
         sort,
         populate,
       })
@@ -67,12 +68,12 @@ exports.fetch_get = async (req, res) => {
 exports.fetch_single_get = async (req, res) => {
   const { postId } = req.params
 
-  let query = {
+  const query = {
     _id: postId,
     isDeleted: false,
   }
 
-  let populate = [
+  const populate = [
     {
       path: 'user',
       select: 'username avatar isVerified',
@@ -86,7 +87,7 @@ exports.fetch_single_get = async (req, res) => {
   ]
 
   try {
-    let post = await Post.findOne(query).populate(populate)
+    const post = await Post.findOne(query).populate(populate)
     if (!post) {
       return res.status(404).send({
         error: 'Post not found',
@@ -123,7 +124,7 @@ exports.create_post = async (req, res) => {
       instrument = new Instrument({
         user: user._id,
         minted: blockCount,
-        symbol: 'BLOCK-' + user.username,
+        symbol: `BLOCK-${user.username}`,
       })
     }
     await instrument.save()
@@ -142,7 +143,7 @@ exports.create_post = async (req, res) => {
 
     if (newPost.type === 'image') {
       axios
-        .post(PROCESSING_SERVER_URL + '/api/process/post/image', {
+        .post(`${PROCESSING_SERVER_URL}/api/process/post/image`, {
           post: newPost._id,
         })
         .catch(console.error)
@@ -186,7 +187,7 @@ exports.like_put = async (req, res) => {
 
     await newLike.save()
 
-    res.send({
+    return res.send({
       success: true,
     })
   } catch (err) {
@@ -286,7 +287,7 @@ exports.bookmark_put = async (req, res) => {
 
     await newBookmark.save()
 
-    res.send({
+    return res.send({
       success: true,
     })
   } catch (err) {
@@ -362,7 +363,7 @@ exports.comments_post = async (req, res) => {
 
     await newComment.save()
 
-    res.send({
+    return res.send({
       success: true,
     })
   } catch (err) {
@@ -383,20 +384,20 @@ exports.comments_get = async (req, res) => {
       })
     }
 
-    let populate = [
+    const populate = [
       {
         path: 'user',
         select: 'username avatar isVerified',
       },
     ]
 
-    let comments = await Comment.find({
+    const comments = await Comment.find({
       post: postId,
     })
       .populate(populate)
       .sort({ createdAt: -1 })
 
-    res.send(comments)
+    return res.send(comments)
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })

@@ -1,9 +1,10 @@
 /* eslint-disable no-unused-vars */
-const performDatabaseUpdate = require('./performDatabaseUpdate')
 const moment = require('moment-timezone')
 const fs = require('fs-extra')
 
-const ObjectId = require('mongoose').Types.ObjectId
+const { ObjectId } = require('mongoose').Types
+
+const performDatabaseUpdate = require('./performDatabaseUpdate')
 
 const models = require('../models')
 
