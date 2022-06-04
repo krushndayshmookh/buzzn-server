@@ -132,7 +132,7 @@ exports.cancelOrder_delete = async (req, res) => {
       return res.status(404).send('Order not found')
     }
 
-    if (order.user !== user._id) {
+    if (`${order.user}` !== user._id) {
       return res.status(403).send('Access denied')
     }
 

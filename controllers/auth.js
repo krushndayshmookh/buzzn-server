@@ -36,7 +36,7 @@ exports.login_post = async (req, res) => {
         return res.send({
           success: true,
           token,
-          cleanUser,
+          user: cleanUser,
         })
       }
 
