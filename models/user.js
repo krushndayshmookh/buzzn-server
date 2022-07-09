@@ -41,7 +41,7 @@ const UserSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['root', 'base'],
+      enum: ['root', 'base', 'bot'],
       required: true,
       default: 'base',
     },
