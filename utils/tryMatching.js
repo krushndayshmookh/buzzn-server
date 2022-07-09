@@ -9,7 +9,7 @@ const {
 } = require('../models')
 
 module.exports = async order => {
-  const newOrder = { ...order }
+  const newOrder = order
   let qtyMatched = 0
   let amountMatched = 0
   const instrument = await Instrument.findById(newOrder.instrument)
