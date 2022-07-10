@@ -4,7 +4,7 @@ const allowRoot = require('../middlewares/allowRoot')
 const validateToken = require('../middlewares/validateToken')
 
 router.use('/api/auth', require('./auth'))
-router.use('/api/admin', validateToken, allowRoot, require('./admin'))
+router.use('/api/admin', /* validateToken, */ allowRoot, require('./admin'))
 router.use('/api/users', require('./user'))
 router.use('/api/utils', require('./util'))
 router.use('/api/uploads', require('./upload'))
