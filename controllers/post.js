@@ -14,10 +14,16 @@ const BLOCK_COUNTS = require('../configs/PostTypeBlockCounts')
 const { PROCESSING_SERVER_URL } = process.env
 
 exports.fetch_get = async (req, res) => {
-  const { page, limit, user, type } = req.query
+  const { page, limit, user, type, fetchStart } = req.query
 
   const query = {
     isDeleted: false,
+  }
+
+  if (fetchStart) {
+    query.createdAt = {
+      $lte: fetchStart,
+    }
   }
 
   if (type) {
