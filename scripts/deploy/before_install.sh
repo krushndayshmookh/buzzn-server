@@ -15,4 +15,4 @@ node -e "console.log('Running Node.js ' + process.version)"
 # sudo npm install forever -g
 
 # Clean working folder
-# sudo find /home/ubuntu/test -type f -delete
+# sudo find /home/ec2-user/test -type f -delete
