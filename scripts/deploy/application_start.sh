@@ -6,4 +6,4 @@
 # forever stopall
 # forever start /home/ec2-user/nodejs/app.js
 PORT=80
-sudo npm start
+npm start

@@ -64,16 +64,16 @@ hooks:
   BeforeInstall:
     - location: scripts/deploy/before_install.sh
       timeout: 300
-      runas: ec2-user
+      runas: root
 # During the AfterInstall deployment lifecycle event, run the commands
 #   in the script specified in "location".
   AfterInstall:
     - location: scripts/deploy/after_install.sh
       timeout: 300
-      runas: ec2-user
+      runas: root
 # During the ApplicationInstall deployment lifecycle event, run the commands
 #   in the script specified in "location".
   ApplicationStart:
     - location: scripts/deploy/application_start.sh
       timeout: 300
-      runas: ec2-user
+      runas: root

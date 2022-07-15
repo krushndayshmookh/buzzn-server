@@ -4,4 +4,4 @@
 cd /home/ec2-user/nodejs
 
 . ~/.nvm/nvm.sh
-sudo npm install
+npm install
