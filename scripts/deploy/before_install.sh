@@ -11,9 +11,9 @@ node -e "console.log('Running Node.js ' + process.version)"
 # Install nodemon
 # sudo npm install nodemon -g
 
-# Install forever module
-# https://www.npmjs.com/package/forever
-# sudo npm install forever -g
+# Install pm2 module
+# https://www.npmjs.com/package/pm2
+npm install pm2 -g
 
 # Clean working folder
 # sudo find /home/ec2-user/test -type f -delete
