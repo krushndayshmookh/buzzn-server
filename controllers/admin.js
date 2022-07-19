@@ -12,11 +12,31 @@ exports.users_get = async (req, res) => {
 
 exports.users_put = async (req, res) => {
   const { userId } = req.params
-  const { type } = req.body
+  const { type, isVerified } = req.body
+
+  const update = {}
+
+  if (type) update.type = type
+  if (isVerified) update.isVerified = isVerified
 
   try {
-    const user = await User.findByIdAndUpdate(userId, { type }, { new: true })
+    const user = await User.findByIdAndUpdate(userId, update, { new: true })
     return res.send(user)
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send(err)
+  }
+}
+
+exports.stats_users_get = async (req, res) => {
+  try {
+    const stats = {
+      total: await User.countDocuments(),
+      real: await User.countDocuments({ type: 'base' }),
+      bot: await User.countDocuments({ type: 'bot' }),
+    }
+
+    return res.send(stats)
   } catch (err) {
     console.error(err)
     return res.status(500).send(err)
