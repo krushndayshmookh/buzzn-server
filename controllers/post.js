@@ -148,7 +148,7 @@ exports.create_post = async (req, res) => {
     await blockDelta.save()
 
     if (newPost.type === 'image') {
-      axios
+      await axios
         .post(`${PROCESSING_SERVER_URL}/api/process/post/image`, {
           post: newPost._id,
         })
