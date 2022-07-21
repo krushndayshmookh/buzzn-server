@@ -12,12 +12,13 @@ exports.users_get = async (req, res) => {
 
 exports.users_put = async (req, res) => {
   const { userId } = req.params
-  const { type, isVerified } = req.body
+  const { type, isVerified, chips } = req.body
 
   const update = {}
 
   if (type) update.type = type
   if (isVerified) update.isVerified = isVerified
+  if (chips) update.chips = chips
 
   try {
     const user = await User.findByIdAndUpdate(userId, update, { new: true })
