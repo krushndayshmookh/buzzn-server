@@ -20,11 +20,13 @@ exports.upload_post = async (req, res) => {
 
     let files
 
-    if (!Array.isArray(incomingFiles)) {
+    if (!Array.isArray(incomingFiles.file)) {
       files = [incomingFiles.file]
     } else {
-      files = [...incomingFiles]
+      files = incomingFiles.file
     }
+
+    // console.log(files)
 
     const uploaded = []
 

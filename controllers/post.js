@@ -155,6 +155,14 @@ exports.create_post = async (req, res) => {
         .catch(console.error)
     }
 
+    if (newPost.type === 'audio') {
+      await axios
+        .post(`${PROCESSING_SERVER_URL}/api/process/post/audio`, {
+          post: newPost._id,
+        })
+        .catch(console.error)
+    }
+
     return res.status(201).send({ success: true })
   } catch (err) {
     console.error({ err })

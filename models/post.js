@@ -67,8 +67,28 @@ const PostSchema = new Schema(
         content: {
           type: String,
         },
+        title: {
+          type: String,
+        },
         thumbnail: {
           type: String,
+        },
+        original: {
+          type: String,
+        },
+        originalFilename: {
+          type: String,
+        },
+        cover: {
+          content:{
+            type: String,
+          },
+          original: {
+            type: String,
+          },
+          originalFilename: {
+            type: String,
+          },
         },
       },
     },
