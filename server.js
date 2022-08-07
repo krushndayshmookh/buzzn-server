@@ -2,6 +2,11 @@ const path = require('path')
 
 require('dotenv').config({ path: path.join(__dirname, '.env') })
 
+if(process.env.NODE_ENV !== 'development') {
+  // eslint-disable-next-line global-require
+  require('./newrelic')
+}
+
 const express = require('express')
 
 const mongoose = require('mongoose')
