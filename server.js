@@ -4,7 +4,7 @@ require('dotenv').config({ path: path.join(__dirname, '.env') })
 
 if(process.env.NODE_ENV !== 'development') {
   // eslint-disable-next-line global-require
-  require('./newrelic')
+  require('newrelic')
 }
 
 const express = require('express')
