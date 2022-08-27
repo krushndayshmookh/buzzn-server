@@ -26,6 +26,7 @@ exports.fetchOrders_get = async (req, res) => {
     },
     {
       path: 'trades',
+      select: '-buyer -seller',
     },
   ]
 
