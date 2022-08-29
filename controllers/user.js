@@ -357,12 +357,23 @@ exports.user_watchlist_post = async (req, res) => {
   const { user } = req.decoded
   const { instrument } = req.body
 
-  const userInstrument = new Watchlist({
-    user: user._id,
-    instrument,
-  })
-
   try {
+    const watchExist = await Watchlist.findOne({
+      user: user._id,
+      instrument,
+    })
+
+    if (watchExist) {
+      return res.status(400).send({
+        error: 'Instrument already in watchlist',
+      })
+    }
+
+    const userInstrument = new Watchlist({
+      user: user._id,
+      instrument,
+    })
+
     await userInstrument.save()
 
     return res.send(userInstrument)
