@@ -134,7 +134,7 @@ exports.chart_get = async (req, res) => {
     const queryWithDate = {
       instrument: instrument._id,
       createdAt: {
-        $gte: moment().subtract(1, 'months').toDate(),
+        $gte: moment().subtract(7, 'days').toDate(),
       },
     }
 
