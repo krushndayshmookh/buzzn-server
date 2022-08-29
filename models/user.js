@@ -65,6 +65,30 @@ const UserSchema = new Schema(
       type: Number,
       default: 1000,
     },
+    money: {
+      type: Number,
+      default: 0,
+    },
+    defaultCurrency: {
+      type: String,
+      default: 'INR',
+    },
+    lockedMoney: [
+      {
+        order: {
+          type: Schema.Types.ObjectId,
+          ref: 'Order',
+        },
+        currency: {
+          type: String,
+          enum: ['INR', 'CHIPS'],
+        },
+        amount: {
+          type: Number,
+          default: 0,
+        },
+      },
+    ],
   },
   {
     toJSON: {
