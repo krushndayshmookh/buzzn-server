@@ -123,6 +123,7 @@ exports.market_depth_get = async (req, res) => {
 
 exports.chart_get = async (req, res) => {
   const { instrumentId } = req.params
+  let { timespan } = req.query
 
   try {
     const instrument = await Instrument.findById(instrumentId)
@@ -131,10 +132,36 @@ exports.chart_get = async (req, res) => {
       return res.status(404).send({ error: 'instrument not found' })
     }
 
+    const NOW = moment().tz('Asia/Kolkata')
+
+    let startDate
+
+    if (!timespan) timespan = 'W'
+
+    switch (timespan) {
+      case 'D':
+        startDate = moment(NOW).startOf('day').toDate()
+        break
+      case 'W':
+        startDate = moment(NOW).subtract(1, 'weeks').toDate()
+        break
+      case 'M':
+        startDate = moment(NOW).subtract(1, 'months').toDate()
+        break
+      case 'Y':
+        startDate = moment(NOW).subtract(1, 'years').toDate()
+        break
+      case 'A':
+        startDate = moment('2022-01-01').toDate()
+        break
+      default:
+        startDate = moment(NOW).subtract(1, 'days').toDate()
+    }
+
     const queryWithDate = {
       instrument: instrument._id,
       createdAt: {
-        $gte: moment().subtract(7, 'days').toDate(),
+        $gte: startDate,
       },
     }
 
