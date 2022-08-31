@@ -1,4 +1,4 @@
-const { Instrument, Order, Holding } = require('../models')
+const { Instrument, Order, Holding, User } = require('../models')
 const tryMatching = require('../utils/tryMatching')
 
 exports.fetchOrders_get = async (req, res) => {
@@ -52,7 +52,7 @@ exports.fetchOrders_get = async (req, res) => {
 }
 
 exports.placeOrder_post = async (req, res) => {
-  const { user } = req.decoded
+  const { user: tokenUser } = req.decoded
   const { transactionType, instrument: instrumentId, type } = req.body
   let { quantity, price } = req.body
 
@@ -68,8 +68,10 @@ exports.placeOrder_post = async (req, res) => {
 
     const holding = await Holding.findOne({
       instrument: instrumentId,
-      user: user._id,
+      user: tokenUser._id,
     })
+
+    const user = await User.findById(tokenUser._id)
 
     const availableToSell = holding ? holding.quantity : 0
 
@@ -154,6 +156,50 @@ exports.cancelOrder_delete = async (req, res) => {
     }
 
     return res.status(400).send('Order is already executed')
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.orderStatus_get = async (req, res) => {
+  const { user } = req.decoded
+
+  const sort = {
+    createdAt: -1,
+  }
+
+  const populate = [
+    {
+      path: 'instrument',
+      select: 'symbol user',
+      populate: [
+        {
+          path: 'user',
+          select: 'username',
+        },
+      ],
+    },
+    {
+      path: 'trades',
+      select: '-buyer -seller',
+    },
+  ]
+
+  try {
+    const pendingOrders = await Order.find({
+      user: user._id,
+      status: 'pending',
+    }).sort(sort).populate(populate)
+
+    const totalOrdersCount = await Order.count({
+      user: user._id,
+    })
+
+    return res.send({
+      pendingOrders,
+      totalOrdersCount,
+    })
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
