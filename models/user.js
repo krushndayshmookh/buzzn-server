@@ -101,6 +101,13 @@ const UserSchema = new Schema(
   }
 )
 
+UserSchema.virtual('instrument', {
+  ref: 'Instrument',
+  localField: '_id',
+  foreignField: 'user',
+  justOne: true,
+})
+
 UserSchema.virtual('followersCount', {
   ref: 'Follower',
   localField: '_id',

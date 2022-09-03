@@ -3,11 +3,13 @@ const { Holding, Instrument } = require('../models')
 exports.holdings_get = async (req, res) => {
   const { user } = req.decoded
 
-  const { instrument } = req.query
+  const { instrument, self = 'true', sort = 'false' } = req.query
 
-  const query = {
-    user: user._id,
+  if (!self && !instrument) {
+    return res.status(400).send({ err: 'Please provide instrument' })
   }
+
+  const query = self === 'true' ? { user: user._id } : {}
 
   const populate = [
     {
@@ -20,45 +22,21 @@ exports.holdings_get = async (req, res) => {
         },
       ],
     },
+    {
+      path: 'user',
+      select: 'username avatar instrument',
+    },
   ]
 
   if (instrument) query.instrument = instrument
 
-  try {
-    const holdings = await Holding.find(query).populate(populate).lean()
-
-    return res.send(holdings)
-  } catch (err) {
-    console.error({ err })
-    return res.status(500).send({ err })
-  }
-}
-
-exports.holders_get = async (req, res) => {
-  const { user } = req.decoded
-
-  const instrument = await Instrument.findOne({ user: user._id })
-
-  const query = {
-    instrument: instrument._id,
-  }
-
-  const populate = [
-    {
-      path: 'user',
-      select: 'username avatar',
-    },
-  ]
-
-  const sort = {
-    quantity: -1,
-  }
+  const sortO = sort === 'true' ? { quantity: -1 } : {}
 
   try {
     const holdings = await Holding.find(query)
-      .sort(sort)
+      .sort(sortO)
       .populate(populate)
-      .lean()
+      .lean({ virtuals: true })
 
     return res.send(holdings)
   } catch (err) {
