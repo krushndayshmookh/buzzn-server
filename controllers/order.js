@@ -73,6 +73,10 @@ exports.placeOrder_post = async (req, res) => {
 
     const user = await User.findById(tokenUser._id)
 
+    if(instrument.user === tokenUser._id) {
+      return res.status(400).send('You cannot trade your own instrument')
+    }
+
     const availableToSell = holding ? holding.quantity : 0
 
     const availableToBuy =
