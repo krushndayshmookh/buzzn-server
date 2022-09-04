@@ -7,6 +7,7 @@ const {
   Like,
   Bookmark,
   Comment,
+  Holding,
 } = require('../models')
 
 const BLOCK_COUNTS = require('../configs/PostTypeBlockCounts')
@@ -51,6 +52,8 @@ exports.fetch_get = async (req, res) => {
     },
   ]
 
+  const select = '_id'
+
   try {
     let posts = []
 
@@ -59,10 +62,11 @@ exports.fetch_get = async (req, res) => {
         page: parseInt(page, 10) || 1,
         limit: parseInt(limit, 10) || 100,
         sort,
-        populate,
+        // populate,
+        select,
       })
     } else {
-      posts = await Post.find(query).sort(sort).populate(populate)
+      posts = await Post.find(query).select(select).sort(sort) // .populate(populate)
     }
     return res.send(posts)
   } catch (err) {
@@ -73,6 +77,8 @@ exports.fetch_get = async (req, res) => {
 
 exports.fetch_single_get = async (req, res) => {
   const { postId } = req.params
+
+  const loggedUser = req.decoded
 
   const query = {
     _id: postId,
@@ -93,11 +99,33 @@ exports.fetch_single_get = async (req, res) => {
   ]
 
   try {
-    const post = await Post.findOne(query).populate(populate)
+    const post = await Post.findOne(query)
+      .populate(populate)
+      .lean({ virtuals: true })
+
     if (!post) {
       return res.status(404).send({
         error: 'Post not found',
       })
+    }
+
+    if (!loggedUser && post.requireMinShares > 0) {
+      delete post.content
+    }
+
+    if (loggedUser && post.user._id !== loggedUser._id) {
+      const instrument = await Instrument.findOne({
+        user: post.user._id,
+      })
+
+      const holding = await Holding.findOne({
+        user: loggedUser._id,
+        instrument: instrument._id,
+      })
+
+      if (holding && holding.quantity < post.requireMinShares) {
+        delete post.content
+      }
     }
 
     return res.send(post)
@@ -109,6 +137,10 @@ exports.fetch_single_get = async (req, res) => {
 
 exports.create_post = async (req, res) => {
   const { type, content } = req.body
+  let { requireMinShares } = req.body
+
+  requireMinShares = parseInt(requireMinShares, 10)
+
   const { user } = req.decoded
 
   const blockCount = BLOCK_COUNTS[type]
@@ -118,6 +150,7 @@ exports.create_post = async (req, res) => {
       user: user._id,
       type,
       content,
+      requireMinShares,
     })
 
     await newPost.save()

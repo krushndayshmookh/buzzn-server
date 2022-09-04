@@ -3,12 +3,13 @@ const router = require('express').Router()
 const postController = require('../controllers/post')
 
 const validateToken = require('../middlewares/validateToken')
+const validateTokenOptional = require('../middlewares/validateTokenOptional')
 
 router.post('/', validateToken, postController.create_post)
 
 router.get('/', postController.fetch_get)
 
-router.get('/:postId', postController.fetch_single_get)
+router.get('/:postId', validateTokenOptional, postController.fetch_single_get)
 
 router.post('/:postId/comments', validateToken, postController.comments_post)
 

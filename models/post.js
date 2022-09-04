@@ -15,6 +15,10 @@ const PostSchema = new Schema(
       enum: ['text', 'article', 'image', 'video', 'audio'],
       required: true,
     },
+    requireMinShares: {
+      type: Number,
+      default: 0,
+    },
     content: {
       text: {
         content: {
@@ -80,7 +84,7 @@ const PostSchema = new Schema(
           type: String,
         },
         cover: {
-          content:{
+          content: {
             type: String,
           },
           original: {
