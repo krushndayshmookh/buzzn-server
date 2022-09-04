@@ -33,6 +33,9 @@ const PostSchema = new Schema(
         font: {
           type: String,
         },
+        thumbnail: {
+          type: String,
+        },
       },
       article: {
         title: {

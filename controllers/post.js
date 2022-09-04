@@ -39,18 +39,18 @@ exports.fetch_get = async (req, res) => {
     createdAt: -1,
   }
 
-  const populate = [
-    {
-      path: 'user',
-      select: 'username avatar isVerified',
-    },
-    {
-      path: 'likesCount',
-    },
-    {
-      path: 'commentsCount',
-    },
-  ]
+  // const populate = [
+  //   {
+  //     path: 'user',
+  //     select: 'username avatar isVerified',
+  //   },
+  //   {
+  //     path: 'likesCount',
+  //   },
+  //   {
+  //     path: 'commentsCount',
+  //   },
+  // ]
 
   const select = '_id'
 
@@ -78,7 +78,7 @@ exports.fetch_get = async (req, res) => {
 exports.fetch_single_get = async (req, res) => {
   const { postId } = req.params
 
-  const loggedUser = req.decoded
+  const { user: loggedUser } = req.decoded
 
   const query = {
     _id: postId,
@@ -109,22 +109,24 @@ exports.fetch_single_get = async (req, res) => {
       })
     }
 
-    if (!loggedUser && post.requireMinShares > 0) {
-      delete post.content
-    }
-
-    if (loggedUser && post.user._id !== loggedUser._id) {
-      const instrument = await Instrument.findOne({
-        user: post.user._id,
-      })
-
-      const holding = await Holding.findOne({
-        user: loggedUser._id,
-        instrument: instrument._id,
-      })
-
-      if (holding && holding.quantity < post.requireMinShares) {
+    if (post.requireMinShares > 0) {
+      if (!loggedUser) {
         delete post.content
+      }
+
+      if (loggedUser && `${post.user._id}` !== loggedUser._id) {
+        const instrument = await Instrument.findOne({
+          user: post.user._id,
+        })
+
+        const holding = await Holding.findOne({
+          user: loggedUser._id,
+          instrument: instrument._id,
+        })
+
+        if (!holding || holding.quantity < post.requireMinShares) {
+          delete post.content
+        }
       }
     }
 
