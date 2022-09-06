@@ -3,10 +3,18 @@ const tryMatching = require('../utils/tryMatching')
 
 exports.fetchOrders_get = async (req, res) => {
   const { user } = req.decoded
-  const { page, limit } = req.body
+  const { instrument, status, page, limit } = req.query
 
   const query = {
     user: user._id,
+  }
+
+  if (instrument) {
+    query.instrument = instrument
+  }
+
+  if (status) {
+    query.status = status
   }
 
   const sort = {
@@ -73,7 +81,7 @@ exports.placeOrder_post = async (req, res) => {
 
     const user = await User.findById(tokenUser._id)
 
-    if(instrument.user === tokenUser._id) {
+    if (instrument.user === tokenUser._id) {
       return res.status(400).send('You cannot trade your own instrument')
     }
 
@@ -166,44 +174,25 @@ exports.cancelOrder_delete = async (req, res) => {
   }
 }
 
-exports.orderStatus_get = async (req, res) => {
+exports.fetchOrdersCount_get = async (req, res) => {
   const { user } = req.decoded
+  const { instrument, status } = req.query
 
-  const sort = {
-    createdAt: -1,
+  const query = {
+    user: user._id,
   }
 
-  const populate = [
-    {
-      path: 'instrument',
-      select: 'symbol user',
-      populate: [
-        {
-          path: 'user',
-          select: 'username',
-        },
-      ],
-    },
-    {
-      path: 'trades',
-      select: '-buyer -seller',
-    },
-  ]
+  if (instrument) {
+    query.instrument = instrument
+  }
+
+  if (status) {
+    query.status = status
+  }
 
   try {
-    const pendingOrders = await Order.find({
-      user: user._id,
-      status: 'pending',
-    }).sort(sort).populate(populate)
-
-    const totalOrdersCount = await Order.count({
-      user: user._id,
-    })
-
-    return res.send({
-      pendingOrders,
-      totalOrdersCount,
-    })
+    const count = await Order.countDocuments(query)
+    return res.send({ count })
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })

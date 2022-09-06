@@ -8,7 +8,7 @@ router.post('/', validateToken, orderController.placeOrder_post)
 
 router.get('/', validateToken, orderController.fetchOrders_get)
 
-router.get('/status', validateToken, orderController.orderStatus_get)
+router.get('/count', validateToken, orderController.fetchOrdersCount_get)
 
 router.delete('/:orderId', validateToken, orderController.cancelOrder_delete)
 
