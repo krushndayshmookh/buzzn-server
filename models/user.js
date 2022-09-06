@@ -61,6 +61,9 @@ const UserSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    about: {
+      type: Object,
+    },
     chips: {
       type: Number,
       default: 1000,
