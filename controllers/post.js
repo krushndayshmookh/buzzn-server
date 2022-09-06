@@ -78,7 +78,7 @@ exports.fetch_get = async (req, res) => {
 exports.fetch_single_get = async (req, res) => {
   const { postId } = req.params
 
-  const { user: loggedUser } = req.decoded
+  const loggedUser = req.decoded?.user || null
 
   const query = {
     _id: postId,
