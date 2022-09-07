@@ -160,11 +160,13 @@ exports.create_post = async (req, res) => {
     let instrument = await Instrument.findOne({ user: user._id })
 
     if (instrument) {
-      instrument.minted += blockCount
+      // instrument.minted += blockCount
+      instrument.fresh += blockCount
     } else {
       instrument = new Instrument({
         user: user._id,
-        minted: blockCount,
+        // minted: blockCount,
+        fresh: blockCount,
         symbol: `BLOCK-${user.username}`,
       })
     }
