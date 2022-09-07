@@ -106,11 +106,11 @@ module.exports = async order => {
 
         await User.updateOne(
           { _id: newOrder.user },
-          { $inc: { chips: -amountMatched } }
+          { $inc: { cash: -amountMatched } }
         )
         await User.updateOne(
           { _id: instrument.user },
-          { $inc: { chips: amountMatched - totalCommission } }
+          { $inc: { cash: amountMatched - totalCommission } }
         )
       }
 
@@ -212,11 +212,11 @@ module.exports = async order => {
         await newOrder.save()
         await User.updateOne(
           { _id: newOrder.user },
-          { $inc: { chips: -amountMatched } }
+          { $inc: { cash: -amountMatched } }
         )
         await User.updateOne(
           { _id: candidateOrder.user },
-          { $inc: { chips: amountMatched - totalTradeCommission } }
+          { $inc: { cash: amountMatched - totalTradeCommission } }
         )
         await candidateOrder.save()
 
@@ -338,11 +338,11 @@ module.exports = async order => {
 
         await User.updateOne(
           { _id: newOrder.user },
-          { $inc: { chips: amountMatched - totalTradeCommission } }
+          { $inc: { cash: amountMatched - totalTradeCommission } }
         )
         await User.updateOne(
           { _id: candidateOrder.user },
-          { $inc: { chips: -amountMatched } }
+          { $inc: { cash: -amountMatched } }
         )
         await candidateOrder.save()
 
@@ -441,11 +441,11 @@ module.exports = async order => {
 
           await User.updateOne(
             { _id: newOrder.user },
-            { $inc: { chips: -amountMatched } }
+            { $inc: { cash: -amountMatched } }
           )
           await User.updateOne(
             { _id: instrument.user },
-            { $inc: { chips: amountMatched - totalCommission } }
+            { $inc: { cash: amountMatched - totalCommission } }
           )
         }
       }
@@ -550,11 +550,11 @@ module.exports = async order => {
         await newOrder.save()
         await User.updateOne(
           { _id: newOrder.user },
-          { $inc: { chips: -amountMatched } }
+          { $inc: { cash: -amountMatched } }
         )
         await User.updateOne(
           { _id: candidateOrder.user },
-          { $inc: { chips: amountMatched - totalTradeCommission } }
+          { $inc: { cash: amountMatched - totalTradeCommission } }
         )
         await candidateOrder.save()
 
@@ -680,11 +680,11 @@ module.exports = async order => {
         await newOrder.save()
         await User.updateOne(
           { _id: newOrder.user },
-          { $inc: { chips: amountMatched - totalTradeCommission } }
+          { $inc: { cash: amountMatched - totalTradeCommission } }
         )
         await User.updateOne(
           { _id: candidateOrder.user },
-          { $inc: { chips: -amountMatched } }
+          { $inc: { cash: -amountMatched } }
         )
         await candidateOrder.save()
 

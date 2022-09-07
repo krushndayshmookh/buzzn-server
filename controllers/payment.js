@@ -63,7 +63,7 @@ exports.validate_post = async (req, res) => {
       await payment.save()
       await User.updateOne(
         { _id: user._id },
-        { $inc: { chips: payment.quantity } }
+        { $inc: { cash: payment.quantity } }
       )
       return res.json({ success: true })
     }

@@ -11,7 +11,7 @@ const models = require('../models')
 async function run() {
   try {
     // do something
-    await models.User.updateMany({}, { $set: { chips: 1000 } })
+    await models.User.updateMany({}, { $set: { cash: 1000 } })
   } catch (err) {
     console.error(err)
   }

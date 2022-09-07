@@ -1,3 +1,4 @@
+/* eslint-disable func-names */
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
 
@@ -64,13 +65,15 @@ const UserSchema = new Schema(
     about: {
       type: Object,
     },
-    chips: {
-      type: Number,
-      default: 1000,
-    },
-    money: {
+    cash: {
       type: Number,
       default: 0,
+      required: true,
+    },
+    bonusCash: {
+      type: Number,
+      default: 0,
+      required: true,
     },
     defaultCurrency: {
       type: String,
@@ -82,11 +85,7 @@ const UserSchema = new Schema(
           type: Schema.Types.ObjectId,
           ref: 'Order',
         },
-        currency: {
-          type: String,
-          enum: ['INR', 'CHIPS'],
-        },
-        amount: {
+        chips: {
           type: Number,
           default: 0,
         },
@@ -123,6 +122,14 @@ UserSchema.virtual('followingCount', {
   localField: '_id',
   foreignField: 'follower',
   count: true,
+})
+
+// UserSchema.virtual('lockedCash').get(function () {
+//   return this.lockedMoney.reduce((acc, curr) => acc + curr.chips, 0)
+// })
+
+UserSchema.virtual('chips').get(function () {
+  return this.cash + this.bonusCash // - this.lockedCash
 })
 
 UserSchema.plugin(mongoosePaginate)

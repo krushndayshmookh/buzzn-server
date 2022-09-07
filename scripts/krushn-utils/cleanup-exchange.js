@@ -25,8 +25,8 @@ async function run() {
       { ltp: 10, fresh: 0, minted: 0, floating: 0, delta: 0 }
     )
 
-    // reset User.chips
-    await User.updateMany({}, { chips: 0 })
+    // reset User.cash
+    await User.updateMany({}, { cash: 0 })
 
     console.info('done')
   } catch (err) {

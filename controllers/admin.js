@@ -12,13 +12,13 @@ exports.users_get = async (req, res) => {
 
 exports.users_put = async (req, res) => {
   const { userId } = req.params
-  // const { type, isVerified, chips, about } = req.body
+  // const { type, isVerified, cash, about } = req.body
 
   const update = { ...req.body }
 
   // if (type) update.type = type
   // if (isVerified) update.isVerified = isVerified
-  // if (chips) update.chips = chips
+  // if (cash) update.cash = cash
   // if (about) update.about = about
 
   try {

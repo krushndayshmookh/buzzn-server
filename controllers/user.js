@@ -43,7 +43,9 @@ exports.byUsername_get = async (req, res) => {
 
   try {
     const user = await User.findOne(query)
-      .select('username firstName lastName bio avatar categories isVerified about')
+      .select(
+        'username firstName lastName bio avatar categories isVerified about'
+      )
       .populate('followersCount followingCount')
     // .lean({ virtuals: true })
 
@@ -63,7 +65,9 @@ exports.details_get = async (req, res) => {
 
   try {
     const user = await User.findOne(query)
-      .select('username firstName lastName bio avatar categories isVerified about')
+      .select(
+        'username firstName lastName bio avatar categories isVerified about'
+      )
       .lean()
 
     return res.send(user)
@@ -83,9 +87,9 @@ exports.profile_get = async (req, res) => {
   try {
     const existingUser = await User.findOne(query)
       .select(
-        'username firstName lastName bio avatar categories isVerified chips about'
+        'username firstName lastName bio avatar categories isVerified about cash bonusCash chips'
       )
-      .lean()
+      .lean({ virtuals: true })
 
     if (!existingUser) {
       return res.status(404).send({
