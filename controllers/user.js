@@ -47,7 +47,7 @@ exports.byUsername_get = async (req, res) => {
         'username firstName lastName bio avatar categories isVerified about'
       )
       .populate('followersCount followingCount')
-    // .lean({ virtuals: true })
+      .lean({ virtuals: true })
 
     return res.send(user)
   } catch (err) {
