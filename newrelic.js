@@ -9,11 +9,11 @@ exports.config = {
   /**
    * Array of application names.
    */
-  app_name: ['buzzn-server-dev'],
+  app_name: ['buzzn-server'],
   /**
    * Your New Relic license key.
    */
-  license_key: '73abb965e6b3729b30440bd2d42b5d0f77e1NRAL',
+  license_key: '64c0896a2991146381d4dac29f4bd709085aNRAL',
   logging: {
     /**
      * Level at which to log. 'trace' is most useful to New Relic when diagnosing
