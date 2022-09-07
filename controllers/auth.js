@@ -51,7 +51,7 @@ exports.login_post = async (req, res) => {
 }
 
 exports.register_post = async (req, res) => {
-  const { username, email, password } = req.body
+  const { username, email, password, referrer } = req.body
 
   const newUser = new User({
     username,
@@ -68,6 +68,13 @@ exports.register_post = async (req, res) => {
   try {
     await newUser.save()
     await newInstrument.save()
+    if (referrer) {
+      const referrerUser = await User.findOne({ referralCode: referrer })
+      if (referrerUser) {
+        referrerUser.bonusCash += 50
+        await referrerUser.save()
+      }
+    }
     return res.status(201).send({ success: true })
   } catch (err) {
     if (err.code === 11000) {
