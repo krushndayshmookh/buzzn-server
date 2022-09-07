@@ -198,7 +198,7 @@ exports.create_post = async (req, res) => {
         .catch(console.error)
     }
 
-    return res.status(201).send({ success: true })
+    return res.status(201).send(newPost)
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
