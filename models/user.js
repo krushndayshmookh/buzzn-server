@@ -4,6 +4,8 @@ const mongoosePaginate = require('mongoose-paginate')
 
 const { Schema } = mongoose
 
+const generate = require('../utils/generate')
+
 const UserSchema = new Schema(
   {
     username: {
@@ -91,6 +93,12 @@ const UserSchema = new Schema(
         },
       },
     ],
+    referralCode: {
+      type: String,
+      default: generate.string(6),
+      required: true,
+      unique: true,
+    },
   },
   {
     toJSON: {

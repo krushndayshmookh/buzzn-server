@@ -87,7 +87,7 @@ exports.profile_get = async (req, res) => {
   try {
     const existingUser = await User.findOne(query)
       .select(
-        'username firstName lastName bio avatar categories isVerified about cash bonusCash chips'
+        'username firstName lastName bio avatar categories isVerified about cash bonusCash chips referralCode'
       )
       .lean({ virtuals: true })
 
