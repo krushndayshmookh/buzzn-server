@@ -74,7 +74,7 @@ const UserSchema = new Schema(
     },
     bonusCash: {
       type: Number,
-      default: 0,
+      default: 1000,
       required: true,
     },
     defaultCurrency: {
