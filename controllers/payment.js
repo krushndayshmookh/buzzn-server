@@ -12,6 +12,18 @@ exports.checkout_post = async (req, res) => {
   const price = CHIP_PRICE.INR
 
   try {
+    const savedUser = await User.findOne({ _id: user._id })
+
+    if (!savedUser.customer) {
+      const customer = await stripe.customers.create({
+        email: savedUser.email,
+        name: `${savedUser.firstName} ${savedUser.lastName}`,
+        phone: savedUser.phone,
+      })
+      savedUser.customer = customer.id
+      await savedUser.save()
+    }
+
     const priceInPaise = price * 100
     const amount = priceInPaise * quantity
 
@@ -21,6 +33,7 @@ exports.checkout_post = async (req, res) => {
       price,
       currency: 'INR',
       status: 'pending',
+      customer: user.customer,
     })
 
     const paymentIntent = await stripe.paymentIntents.create({
