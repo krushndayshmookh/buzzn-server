@@ -24,7 +24,7 @@ exports.instrument_get = async (req, res) => {
     const dayStartTick = await Tick.findOne({
       instrument: instrumentId,
       timestamp: {
-        $gte: moment.timezone('Asia/Kolkata').startOf('day').toDate(),
+        $gte: moment.tz('Asia/Kolkata').startOf('day').toDate(),
       },
     })
       .sort({ timestamp: 1 })
