@@ -9,7 +9,13 @@ exports.holdings_get = async (req, res) => {
     return res.status(400).send({ err: 'Please provide instrument' })
   }
 
-  const query = self === 'true' ? { user: user._id } : {}
+  const query = {
+    quantity: { $gt: 0 },
+  }
+
+  if (self === 'true') {
+    query.user = user._id
+  }
 
   const populate = [
     {
