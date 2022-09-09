@@ -31,7 +31,9 @@ exports.instrument_get = async (req, res) => {
       .lean()
 
     instrument.dayStartTick = dayStartTick
-    instrument.change = instrument.ltp - instrument.dayStartTick.price
+    instrument.change =
+      (instrument.ltp - instrument.dayStartTick.price) /
+      instrument.dayStartTick.price
 
     return res.send(instrument)
   } catch (err) {
