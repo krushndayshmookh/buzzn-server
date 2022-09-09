@@ -191,7 +191,7 @@ exports.chart_get = async (req, res) => {
 
     const project = {
       _id: 0,
-      timestamp: {
+      createdAt: {
         $toLong: '$timestamp',
       },
       price: 1,
