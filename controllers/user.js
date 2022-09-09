@@ -1,4 +1,5 @@
-const { User, Follower, Instrument, Watchlist } = require('../models')
+const moment = require('moment-timezone')
+const { User, Follower, Instrument, Watchlist, Tick } = require('../models')
 const stringSort = require('../utils/stringSort')
 const { generateToken } = require('./auth')
 
@@ -349,6 +350,20 @@ exports.user_instrument_get = async (req, res) => {
 
   try {
     const instrument = await Instrument.findOne(query).lean()
+
+    const dayStartTick = await Tick.findOne({
+      instrument: instrument._id,
+      timestamp: {
+        $gte: moment.tz('Asia/Kolkata').startOf('day').toDate(),
+      },
+    })
+      .sort({ timestamp: 1 })
+      .lean()
+
+    instrument.dayStartTick = dayStartTick
+    instrument.change =
+      ((instrument.ltp - instrument.dayStartTick.price) * 100) /
+      instrument.dayStartTick.price
 
     return res.send(instrument)
   } catch (err) {
