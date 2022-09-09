@@ -1,5 +1,5 @@
 const moment = require('moment-timezone')
-const { Instrument, BlockDelta, Order, Trade } = require('../models')
+const { Instrument, BlockDelta, Order, Tick } = require('../models')
 
 exports.instruments_list_get = async (req, res) => {
   try {
@@ -135,69 +135,64 @@ exports.chart_get = async (req, res) => {
     const NOW = moment().tz('Asia/Kolkata')
 
     let startDate
+    let step
 
     if (!timespan) timespan = 'W'
 
     switch (timespan) {
       case 'D':
         startDate = moment(NOW).startOf('day').toDate()
+        step = 1
         break
       case 'W':
         startDate = moment(NOW).subtract(1, 'weeks').toDate()
+        step = 30
         break
       case 'M':
         startDate = moment(NOW).subtract(1, 'months').toDate()
+        step = 120
         break
       case 'Y':
         startDate = moment(NOW).subtract(1, 'years').toDate()
+        step = 1440
         break
       case 'A':
         startDate = moment('2022-01-01').toDate()
+        step = 1440
         break
       default:
         startDate = moment(NOW).subtract(1, 'days').toDate()
+        step = 5
     }
 
-    const queryWithDate = {
+    const query = {
       instrument: instrument._id,
-      createdAt: {
+      timestamp: {
         $gte: startDate,
       },
     }
 
-    const queryWithLimit = {
-      instrument: instrument._id,
-    }
-
-    const limit = 100
-
     const sort = {
-      createdAt: 1,
+      timestamp: 1,
     }
 
     const project = {
-      createdAt: {
-        $toLong: '$createdAt',
+      _id: 0,
+      timestamp: {
+        $toLong: '$timestamp',
       },
       price: 1,
     }
 
     let chart = []
 
-    chart = await Trade.aggregate([
-      { $match: queryWithDate },
+    chart = await Tick.aggregate([
+      { $match: query },
       { $sort: sort },
       { $project: project },
     ])
 
-    if (!chart.length) {
-      chart = await Trade.aggregate([
-        { $match: queryWithLimit },
-        { $sort: sort },
-        { $limit: limit },
-        { $project: project },
-      ])
-    }
+    chart = chart.filter((tick, index) => index % step === 0)
 
     if (!chart.length) {
       chart = [
@@ -206,7 +201,7 @@ exports.chart_get = async (req, res) => {
           price: instrument.ltp,
         },
         {
-          createdAt: new moment.tz('Asia/Kolkata').valueOf(),
+          createdAt: NOW.valueOf(),
           price: instrument.ltp,
         },
       ]
