@@ -36,7 +36,7 @@ exports.holdings_get = async (req, res) => {
 
   if (instrument) query.instrument = instrument
 
-  const sortO = sort === 'true' ? { quantity: -1 } : {}
+  const sortO = sort === 'true' ? { createdAt: -1 } : { quantity: -1 }
 
   try {
     const holdings = await Holding.find(query)
