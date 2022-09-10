@@ -8,6 +8,12 @@ const {
   Config,
 } = require('../models')
 
+const FRESH_SYSTEM_RATE = 0.8
+const FRESH_OWNER_RATE = 0
+
+const FLOAT_SYSTEM_RATE = 0.005
+const FLOAT_OWNER_RATE = 0.005
+
 module.exports = async order => {
   const newOrder = order
   let qtyMatched = 0
@@ -39,10 +45,11 @@ module.exports = async order => {
           instrument: instrument._id,
           price: instrument.ltp,
           quantity: Math.min(newOrder.quantity, instrument.fresh),
-          ownerCommission: 0,
+          ownerCommission: FRESH_OWNER_RATE,
         })
 
-        newTrade.systemCommission = newTrade.quantity * newTrade.price * 0.8
+        newTrade.systemCommission =
+          newTrade.quantity * newTrade.price * FRESH_SYSTEM_RATE
         const totalCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
@@ -157,8 +164,10 @@ module.exports = async order => {
           quantity: Math.min(qtyPending, candidateUnmatchedQuantity),
         })
 
-        newTrade.systemCommission = newTrade.quantity * newTrade.price * 0.005
-        newTrade.ownerCommission = newTrade.quantity * newTrade.price * 0.005
+        newTrade.systemCommission =
+          newTrade.quantity * newTrade.price * FLOAT_SYSTEM_RATE
+        newTrade.ownerCommission =
+          newTrade.quantity * newTrade.price * FLOAT_OWNER_RATE
         const totalTradeCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
@@ -271,8 +280,10 @@ module.exports = async order => {
           quantity: Math.min(qtyPending, candidateUnmatchedQuantity),
         })
 
-        newTrade.systemCommission = newTrade.quantity * newTrade.price * 0.005
-        newTrade.ownerCommission = newTrade.quantity * newTrade.price * 0.005
+        newTrade.systemCommission =
+          newTrade.quantity * newTrade.price * FLOAT_SYSTEM_RATE
+        newTrade.ownerCommission =
+          newTrade.quantity * newTrade.price * FLOAT_OWNER_RATE
         const totalTradeCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
@@ -382,10 +393,11 @@ module.exports = async order => {
             instrument: instrument._id,
             price: newOrder.price,
             quantity: Math.min(newOrder.quantity, instrument.fresh),
-            ownerCommission: 0,
+            ownerCommission: FRESH_OWNER_RATE,
           })
 
-          newTrade.systemCommission = newTrade.quantity * newTrade.price * 0.8
+          newTrade.systemCommission =
+            newTrade.quantity * newTrade.price * FRESH_SYSTEM_RATE
           const totalCommission =
             newTrade.systemCommission + newTrade.ownerCommission
 
@@ -504,8 +516,10 @@ module.exports = async order => {
           quantity: Math.min(qtyPending, candidateUnmatchedQuantity),
         })
 
-        newTrade.systemCommission = newTrade.quantity * newTrade.price * 0.005
-        newTrade.ownerCommission = newTrade.quantity * newTrade.price * 0.005
+        newTrade.systemCommission =
+          newTrade.quantity * newTrade.price * FLOAT_SYSTEM_RATE
+        newTrade.ownerCommission =
+          newTrade.quantity * newTrade.price * FLOAT_OWNER_RATE
         const totalTradeCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
@@ -623,8 +637,10 @@ module.exports = async order => {
           quantity: Math.min(qtyPending, candidateUnmatchedQuantity),
         })
 
-        newTrade.systemCommission = newTrade.quantity * newTrade.price * 0.005
-        newTrade.ownerCommission = newTrade.quantity * newTrade.price * 0.005
+        newTrade.systemCommission =
+          newTrade.quantity * newTrade.price * FLOAT_SYSTEM_RATE
+        newTrade.ownerCommission =
+          newTrade.quantity * newTrade.price * FLOAT_OWNER_RATE
         const totalTradeCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
