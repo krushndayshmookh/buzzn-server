@@ -264,7 +264,7 @@ module.exports = async order => {
           {
             user: instrument.user,
             amount: newTrade.ownerCommission,
-            type: 'trade-commision',
+            type: 'trade-commission',
             trade: newTrade._id,
           },
         ])
@@ -416,7 +416,7 @@ module.exports = async order => {
           {
             user: instrument.user,
             amount: newTrade.ownerCommission,
-            type: 'trade-commision',
+            type: 'trade-commission',
             trade: newTrade._id,
           },
         ])
@@ -670,7 +670,7 @@ module.exports = async order => {
           {
             user: instrument.user,
             amount: newTrade.ownerCommission,
-            type: 'trade-commision',
+            type: 'trade-commission',
             trade: newTrade._id,
           },
         ])
@@ -827,7 +827,7 @@ module.exports = async order => {
           {
             user: instrument.user,
             amount: newTrade.ownerCommission,
-            type: 'trade-commision',
+            type: 'trade-commission',
             trade: newTrade._id,
           },
         ])
