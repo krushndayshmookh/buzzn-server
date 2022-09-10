@@ -12,44 +12,39 @@ async function fixHoldings() {
       instrument: holding.instrument,
       buyer: holding.user,
     })
-    const sellTrades = await Trade.find({
-      instrument: holding.instrument,
-      seller: holding.user,
-    })
+    // const sellTrades = await Trade.find({
+    //   instrument: holding.instrument,
+    //   seller: holding.user,
+    // })
     const buyQuantity = buyTrades.reduce(
       (acc, trade) => acc + trade.quantity,
       0
     )
-    const sellQuantity = sellTrades.reduce(
-      (acc, trade) => acc + trade.quantity,
-      0
-    )
-    const quantity = buyQuantity - sellQuantity
-    if (quantity !== holding.quantity) {
-      console.info(
-        `Updating holding ${holding._id} from ${holding.quantity} to ${quantity}`
-      )
-      holding.quantity = quantity
-      await holding.save()
-    }
+    // const sellQuantity = sellTrades.reduce(
+    //   (acc, trade) => acc + trade.quantity,
+    //   0
+    // )
+    // const quantity = buyQuantity - sellQuantity
+    // if (quantity !== holding.quantity) {
+    //   console.info(
+    //     `Updating holding ${holding._id} from ${holding.quantity} to ${quantity}`
+    //   )
+    //   holding.quantity = quantity
+    //   await holding.save()
+    // }
     const buyPrice = buyQuantity
       ? buyTrades.reduce(
           (acc, trade) => acc + trade.price * trade.quantity,
           0
         ) / buyQuantity
       : 0
-    const sellPrice = sellQuantity
-      ? sellTrades.reduce(
-          (acc, trade) => acc + trade.price * trade.quantity,
-          0
-        ) / sellQuantity
-      : 0
-    const price = (buyPrice + sellPrice) / 2
-    if (price !== holding.averagePrice) {
+
+
+    if (buyPrice !== holding.averagePrice) {
       console.info(
-        `Updating holding ${holding._id} from ${holding.averagePrice} to ${price}`
+        `Updating holding ${holding._id} from ${holding.averagePrice} to ${buyPrice}`
       )
-      holding.averagePrice = price
+      holding.averagePrice = buyPrice
       await holding.save()
     }
     console.info(
@@ -136,9 +131,9 @@ async function cleanHoldings() {
 }
 
 async function run() {
-  // await fixHoldings()
+  await fixHoldings()
   // await cleanHoldings()
-  await fixInstruments()
+  // await fixInstruments()
 }
 
 const main = async () => {
