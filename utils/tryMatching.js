@@ -42,7 +42,7 @@ module.exports = async order => {
           ownerCommission: 0,
         })
 
-        newTrade.systemCommission = (newTrade.quantity * newTrade.price) / 100
+        newTrade.systemCommission = newTrade.quantity * newTrade.price * 0.8
         const totalCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
@@ -157,8 +157,8 @@ module.exports = async order => {
           quantity: Math.min(qtyPending, candidateUnmatchedQuantity),
         })
 
-        newTrade.systemCommission = (newTrade.quantity * newTrade.price) / 100
-        newTrade.ownerCommission = (newTrade.quantity * newTrade.price) / 100
+        newTrade.systemCommission = newTrade.quantity * newTrade.price * 0.005
+        newTrade.ownerCommission = newTrade.quantity * newTrade.price * 0.005
         const totalTradeCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
@@ -218,6 +218,10 @@ module.exports = async order => {
           { _id: candidateOrder.user },
           { $inc: { cash: amountMatched - totalTradeCommission } }
         )
+        await User.updateOne(
+          { _id: instrument.user },
+          { $inc: { cash: newTrade.ownerCommission } }
+        )
         await candidateOrder.save()
 
         instrument.delta = newTrade.price - instrument.ltp
@@ -267,8 +271,8 @@ module.exports = async order => {
           quantity: Math.min(qtyPending, candidateUnmatchedQuantity),
         })
 
-        newTrade.systemCommission = (newTrade.quantity * newTrade.price) / 100
-        newTrade.ownerCommission = (newTrade.quantity * newTrade.price) / 100
+        newTrade.systemCommission = newTrade.quantity * newTrade.price * 0.005
+        newTrade.ownerCommission = newTrade.quantity * newTrade.price * 0.005
         const totalTradeCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
@@ -344,6 +348,10 @@ module.exports = async order => {
           { _id: candidateOrder.user },
           { $inc: { cash: -amountMatched } }
         )
+        await User.updateOne(
+          { _id: instrument.user },
+          { $inc: { cash: newTrade.ownerCommission } }
+        )
         await candidateOrder.save()
 
         instrument.delta = newTrade.price - instrument.ltp
@@ -377,7 +385,7 @@ module.exports = async order => {
             ownerCommission: 0,
           })
 
-          newTrade.systemCommission = (newTrade.quantity * newTrade.price) / 100
+          newTrade.systemCommission = newTrade.quantity * newTrade.price * 0.8
           const totalCommission =
             newTrade.systemCommission + newTrade.ownerCommission
 
@@ -496,8 +504,8 @@ module.exports = async order => {
           quantity: Math.min(qtyPending, candidateUnmatchedQuantity),
         })
 
-        newTrade.systemCommission = (newTrade.quantity * newTrade.price) / 100
-        newTrade.ownerCommission = (newTrade.quantity * newTrade.price) / 100
+        newTrade.systemCommission = newTrade.quantity * newTrade.price * 0.005
+        newTrade.ownerCommission = newTrade.quantity * newTrade.price * 0.005
         const totalTradeCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
@@ -556,6 +564,10 @@ module.exports = async order => {
           { _id: candidateOrder.user },
           { $inc: { cash: amountMatched - totalTradeCommission } }
         )
+        await User.updateOne(
+          { _id: instrument.user },
+          { $inc: { cash: newTrade.ownerCommission } }
+        )
         await candidateOrder.save()
 
         instrument.delta = newTrade.price - instrument.ltp
@@ -611,8 +623,8 @@ module.exports = async order => {
           quantity: Math.min(qtyPending, candidateUnmatchedQuantity),
         })
 
-        newTrade.systemCommission = (newTrade.quantity * newTrade.price) / 100
-        newTrade.ownerCommission = (newTrade.quantity * newTrade.price) / 100
+        newTrade.systemCommission = newTrade.quantity * newTrade.price * 0.005
+        newTrade.ownerCommission = newTrade.quantity * newTrade.price * 0.005
         const totalTradeCommission =
           newTrade.systemCommission + newTrade.ownerCommission
 
@@ -685,6 +697,10 @@ module.exports = async order => {
         await User.updateOne(
           { _id: candidateOrder.user },
           { $inc: { cash: -amountMatched } }
+        )
+        await User.updateOne(
+          { _id: instrument.user },
+          { $inc: { cash: newTrade.ownerCommission } }
         )
         await candidateOrder.save()
 
