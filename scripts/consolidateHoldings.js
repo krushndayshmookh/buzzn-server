@@ -34,15 +34,15 @@ async function fixHoldings() {
     }
     const buyPrice = buyQuantity
       ? buyTrades.reduce(
-        (acc, trade) => acc + trade.price * trade.quantity,
-        0
-      ) / buyQuantity
+          (acc, trade) => acc + trade.price * trade.quantity,
+          0
+        ) / buyQuantity
       : 0
     const sellPrice = sellQuantity
       ? sellTrades.reduce(
-        (acc, trade) => acc + trade.price * trade.quantity,
-        0
-      ) / sellQuantity
+          (acc, trade) => acc + trade.price * trade.quantity,
+          0
+        ) / sellQuantity
       : 0
     const price = (buyPrice + sellPrice) / 2
     if (price !== holding.averagePrice) {
@@ -92,11 +92,15 @@ async function fixInstruments() {
       (acc, holding) => acc + holding.quantity,
       0
     )
-    // console.log({
-    //   isOkay: generatedShares >= heldShares,
-    //   generatedShares,
-    //   heldShares,
-    // })
+    // if (generatedShares && holdings.length) {
+    //   console.log({
+    //     isOkay: generatedShares >= heldShares,
+    //     generatedShares,
+    //     holdings: holdings.length,
+    //     heldShares,
+    //     ...instrument.toObject(),
+    //   })
+    // }
     instrument.fresh = generatedShares - heldShares
     instrument.floating = heldShares
     instrument.minted = 0
@@ -109,8 +113,31 @@ async function fixInstruments() {
   }
 }
 
+async function cleanHoldings() {
+  console.info('Cleaning empty holdings...')
+  await Holding.deleteMany({
+    quantity: 0,
+  })
+
+  console.info('Cleaning holdings due to fresh sell...')
+  const holdings = await Holding.find({
+    quantity: {
+      $lte: 0,
+    },
+  }).populate('user instrument')
+  for (let i = 0; i < holdings.length; i++) {
+    const holding = holdings[i]
+
+    if (`${holding.user._id}` === `${holding.instrument.user}`) {
+      console.info(`Deleting holding ${holding.user.username} ${holding.instrument.symbol}`)
+      await holding.remove()
+    }
+  }
+}
+
 async function run() {
-  await fixHoldings()
+  // await fixHoldings()
+  // await cleanHoldings()
   await fixInstruments()
 }
 
