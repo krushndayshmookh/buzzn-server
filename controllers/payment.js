@@ -1,6 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
-const { Payment, User } = require('../models')
+const { Payment, User, Transaction } = require('../models')
 
 const CHIP_PRICE = require('../configs/chipPrice')
 
@@ -78,6 +78,12 @@ exports.validate_post = async (req, res) => {
         { _id: user._id },
         { $inc: { cash: payment.quantity } }
       )
+      await Transaction.create({
+        user: user._id,
+        amount: payment.quantity,
+        type: 'payment',
+        payment: payment._id,
+      })
       return res.json({ success: true })
     }
     if (paymentIntent.status === 'canceled') {

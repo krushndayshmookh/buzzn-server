@@ -1,4 +1,4 @@
-const { User } = require('../models')
+const { User, Transaction } = require('../models')
 
 exports.users_get = async (req, res) => {
   try {
@@ -22,8 +22,19 @@ exports.users_put = async (req, res) => {
   // if (about) update.about = about
 
   try {
-    const user = await User.findByIdAndUpdate(userId, update, { new: true })
-    return res.send(user)
+    const user = await User.findOne({ _id: userId })
+    if (!user) return res.status(404).send('User not found')
+    const updatedUser = await User.findByIdAndUpdate(userId, update, {
+      new: true,
+    })
+    if (update.cash && update.cash !== user.cash) {
+      const transaction = await Transaction.create({
+        user: userId,
+        amount: update.cash - user.cash,
+        type: update.cash > user.cash ? 'admin-payment' : 'admin-payout',
+      })
+    }
+    return res.send(updatedUser)
   } catch (err) {
     console.error(err)
     return res.status(500).send(err)

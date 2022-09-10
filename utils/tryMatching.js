@@ -6,6 +6,7 @@ const {
   User,
   BlockDelta,
   Config,
+  Transaction,
 } = require('../models')
 
 const FRESH_SYSTEM_RATE = 0.8
@@ -119,6 +120,20 @@ module.exports = async order => {
           { _id: instrument.user },
           { $inc: { cash: amountMatched - totalCommission } }
         )
+        await Transaction.insertMany([
+          {
+            user: newOrder.user,
+            amount: -amountMatched,
+            type: 'trade-buy',
+            trade: newTrade._id,
+          },
+          {
+            user: instrument.user,
+            amount: amountMatched - totalCommission,
+            type: 'trade-fresh-sell',
+            trade: newTrade._id,
+          },
+        ])
       }
 
       if (qtyMatched === newOrder.quantity) {
@@ -219,6 +234,8 @@ module.exports = async order => {
         await blockDeltaSeller.save()
 
         await newOrder.save()
+        await candidateOrder.save()
+
         await User.updateOne(
           { _id: newOrder.user },
           { $inc: { cash: -amountMatched } }
@@ -231,7 +248,26 @@ module.exports = async order => {
           { _id: instrument.user },
           { $inc: { cash: newTrade.ownerCommission } }
         )
-        await candidateOrder.save()
+        await Transaction.insertMany([
+          {
+            user: newOrder.user,
+            amount: -amountMatched,
+            type: 'trade-buy',
+            trade: newTrade._id,
+          },
+          {
+            user: candidateOrder.user,
+            amount: amountMatched - totalTradeCommission,
+            type: 'trade-sell',
+            trade: newTrade._id,
+          },
+          {
+            user: instrument.user,
+            amount: newTrade.ownerCommission,
+            type: 'trade-commision',
+            trade: newTrade._id,
+          },
+        ])
 
         instrument.delta = newTrade.price - instrument.ltp
         instrument.ltp = newTrade.price
@@ -350,6 +386,7 @@ module.exports = async order => {
         await blockDeltaSeller.save()
 
         await newOrder.save()
+        await candidateOrder.save()
 
         await User.updateOne(
           { _id: newOrder.user },
@@ -363,7 +400,26 @@ module.exports = async order => {
           { _id: instrument.user },
           { $inc: { cash: newTrade.ownerCommission } }
         )
-        await candidateOrder.save()
+        await Transaction.insertMany([
+          {
+            user: newOrder.user,
+            amount: amountMatched - totalTradeCommission,
+            type: 'trade-sell',
+            trade: newTrade._id,
+          },
+          {
+            user: candidateOrder.user,
+            amount: -amountMatched,
+            type: 'trade-buy',
+            trade: newTrade._id,
+          },
+          {
+            user: instrument.user,
+            amount: newTrade.ownerCommission,
+            type: 'trade-commision',
+            trade: newTrade._id,
+          },
+        ])
 
         instrument.delta = newTrade.price - instrument.ltp
         instrument.ltp = newTrade.price
@@ -467,6 +523,20 @@ module.exports = async order => {
             { _id: instrument.user },
             { $inc: { cash: amountMatched - totalCommission } }
           )
+          await Transaction.insertMany([
+            {
+              user: newOrder.user,
+              amount: -amountMatched,
+              type: 'trade-buy',
+              trade: newTrade._id,
+            },
+            {
+              user: instrument.user,
+              amount: amountMatched - totalCommission,
+              type: 'trade-fresh-sell',
+              trade: newTrade._id,
+            },
+          ])
         }
       }
 
@@ -570,6 +640,8 @@ module.exports = async order => {
         await blockDeltaSeller.save()
 
         await newOrder.save()
+        await candidateOrder.save()
+
         await User.updateOne(
           { _id: newOrder.user },
           { $inc: { cash: -amountMatched } }
@@ -582,7 +654,26 @@ module.exports = async order => {
           { _id: instrument.user },
           { $inc: { cash: newTrade.ownerCommission } }
         )
-        await candidateOrder.save()
+        await Transaction.insertMany([
+          {
+            user: newOrder.user,
+            amount: -amountMatched,
+            type: 'trade-buy',
+            trade: newTrade._id,
+          },
+          {
+            user: candidateOrder.user,
+            amount: amountMatched - totalTradeCommission,
+            type: 'trade-sell',
+            trade: newTrade._id,
+          },
+          {
+            user: instrument.user,
+            amount: newTrade.ownerCommission,
+            type: 'trade-commision',
+            trade: newTrade._id,
+          },
+        ])
 
         instrument.delta = newTrade.price - instrument.ltp
         instrument.ltp = newTrade.price
@@ -706,6 +797,8 @@ module.exports = async order => {
         await blockDeltaSeller.save()
 
         await newOrder.save()
+        await candidateOrder.save()
+
         await User.updateOne(
           { _id: newOrder.user },
           { $inc: { cash: amountMatched - totalTradeCommission } }
@@ -718,7 +811,26 @@ module.exports = async order => {
           { _id: instrument.user },
           { $inc: { cash: newTrade.ownerCommission } }
         )
-        await candidateOrder.save()
+        await Transaction.insertMany([
+          {
+            user: newOrder.user,
+            amount: amountMatched - totalTradeCommission,
+            type: 'trade-sell',
+            trade: newTrade._id,
+          },
+          {
+            user: candidateOrder.user,
+            amount: -amountMatched,
+            type: 'trade-buy',
+            trade: newTrade._id,
+          },
+          {
+            user: instrument.user,
+            amount: newTrade.ownerCommission,
+            type: 'trade-commision',
+            trade: newTrade._id,
+          },
+        ])
 
         instrument.delta = newTrade.price - instrument.ltp
         instrument.ltp = newTrade.price
