@@ -62,6 +62,38 @@ const PostSchema = new Schema(
           type: String,
         },
       },
+      glimpse: {
+        content: {
+          type: String,
+        },
+        caption: {
+          type: String,
+        },
+        thumbnail: {
+          type: String,
+        },
+        original: {
+          type: String,
+        },
+        originalFilename: {
+          type: String,
+        },
+        processing: {
+          status: {
+            type: String,
+            enum: ['pending', 'processing', 'complete', 'error'],
+            default: 'pending',
+          },
+          range: {
+            start: {
+              type: Number,
+            },
+            end: {
+              type: Number,
+            },
+          }
+        },
+      },
       video: {
         content: {
           type: String,

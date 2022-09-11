@@ -147,6 +147,10 @@ exports.create_post = async (req, res) => {
 
   const blockCount = BLOCK_COUNTS[type]
 
+  if (type === 'glimpse') {
+    content.glimpse.processing.status = 'pending'
+  }
+
   try {
     const newPost = new Post({
       user: user._id,
@@ -184,21 +188,11 @@ exports.create_post = async (req, res) => {
 
     await blockDelta.save()
 
-    if (newPost.type === 'image') {
-      await axios
-        .post(`${PROCESSING_SERVER_URL}/api/process/post/image`, {
-          post: newPost._id,
-        })
-        .catch(console.error)
-    }
-
-    if (newPost.type === 'audio') {
-      await axios
-        .post(`${PROCESSING_SERVER_URL}/api/process/post/audio`, {
-          post: newPost._id,
-        })
-        .catch(console.error)
-    }
+    await axios
+      .post(`${PROCESSING_SERVER_URL}/api/process/post/${type}`, {
+        post: newPost._id,
+      })
+      .catch(console.error)
 
     return res.status(201).send(newPost)
   } catch (err) {
