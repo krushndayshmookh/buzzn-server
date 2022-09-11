@@ -12,7 +12,7 @@ const PostSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['text', 'article', 'image', 'video', 'audio'],
+      enum: ['text', 'article', 'image', 'video', 'audio', 'glimpse'],
       required: true,
     },
     requireMinShares: {
