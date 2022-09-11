@@ -440,105 +440,111 @@ module.exports = async order => {
     if (newOrder.transactionType === 'buy') {
       // console.info('==> BUY')
 
-      if (instrument.fresh) {
-        // fresh buy
-        if (newOrder.price >= instrument.ltp) {
-          const newTrade = new Trade({
-            buyer: newOrder.user,
-            seller: instrument.user,
-            instrument: instrument._id,
-            price: newOrder.price,
-            quantity: Math.min(newOrder.quantity, instrument.fresh),
-            ownerCommission: FRESH_OWNER_RATE,
-          })
+      /**
+       *
+       * Disable this code to prevent price inflation with fresh-sell
+       *
+       */
 
-          newTrade.systemCommission =
-            newTrade.quantity * newTrade.price * FRESH_SYSTEM_RATE
-          const totalCommission =
-            newTrade.systemCommission + newTrade.ownerCommission
+      // if (instrument.fresh) {
+      //   // fresh buy
+      //   if (newOrder.price >= instrument.ltp) {
+      //     const newTrade = new Trade({
+      //       buyer: newOrder.user,
+      //       seller: instrument.user,
+      //       instrument: instrument._id,
+      //       price: newOrder.price,
+      //       quantity: Math.min(newOrder.quantity, instrument.fresh),
+      //       ownerCommission: FRESH_OWNER_RATE,
+      //     })
 
-          totalSystemCommission += newTrade.systemCommission
+      //     newTrade.systemCommission =
+      //       newTrade.quantity * newTrade.price * FRESH_SYSTEM_RATE
+      //     const totalCommission =
+      //       newTrade.systemCommission + newTrade.ownerCommission
 
-          const freshOrder = new Order({
-            user: instrument.user,
-            instrument: instrument._id,
-            quantity: newTrade.quantity,
-            price: newTrade.price,
-            transactionType: 'fresh-sell',
-            status: 'executed',
-            type: 'limit',
-          })
+      //     totalSystemCommission += newTrade.systemCommission
 
-          freshOrder.trades.push(newTrade._id)
-          await freshOrder.save()
+      //     const freshOrder = new Order({
+      //       user: instrument.user,
+      //       instrument: instrument._id,
+      //       quantity: newTrade.quantity,
+      //       price: newTrade.price,
+      //       transactionType: 'fresh-sell',
+      //       status: 'executed',
+      //       type: 'limit',
+      //     })
 
-          await newTrade.save()
-          qtyMatched += newTrade.quantity
-          amountMatched += newTrade.quantity * newTrade.price
+      //     freshOrder.trades.push(newTrade._id)
+      //     await freshOrder.save()
 
-          newOrder.trades.push(newTrade)
-          await newOrder.save()
+      //     await newTrade.save()
+      //     qtyMatched += newTrade.quantity
+      //     amountMatched += newTrade.quantity * newTrade.price
 
-          const existingPrice = holding.averagePrice
-          const existingValue = holding.quantity * existingPrice
-          const newValue = newTrade.quantity * newTrade.price
-          holding.quantity += newTrade.quantity
-          holding.averagePrice = (existingValue + newValue) / holding.quantity
-          await holding.save()
+      //     newOrder.trades.push(newTrade)
+      //     await newOrder.save()
 
-          instrument.fresh -= newTrade.quantity
-          instrument.floating += newTrade.quantity
-          instrument.delta = newTrade.price - instrument.ltp
-          instrument.ltp = newTrade.price
-          await instrument.save()
+      //     const existingPrice = holding.averagePrice
+      //     const existingValue = holding.quantity * existingPrice
+      //     const newValue = newTrade.quantity * newTrade.price
+      //     holding.quantity += newTrade.quantity
+      //     holding.averagePrice = (existingValue + newValue) / holding.quantity
+      //     await holding.save()
 
-          const blockDeltaBuyer = new BlockDelta({
-            user: newOrder.user,
-            instrument: instrument._id,
-            type: 'fresh-buy',
-            quantity: newTrade.quantity,
-            data: {
-              trade: newTrade._id,
-            },
-          })
+      //     instrument.fresh -= newTrade.quantity
+      //     instrument.floating += newTrade.quantity
+      //     instrument.delta = newTrade.price - instrument.ltp
+      //     instrument.ltp = newTrade.price
+      //     await instrument.save()
 
-          const blockDeltaSeller = new BlockDelta({
-            user: instrument.user,
-            instrument: instrument._id,
-            type: 'fresh-sell',
-            quantity: -newTrade.quantity,
-            data: {
-              trade: newTrade._id,
-            },
-          })
+      //     const blockDeltaBuyer = new BlockDelta({
+      //       user: newOrder.user,
+      //       instrument: instrument._id,
+      //       type: 'fresh-buy',
+      //       quantity: newTrade.quantity,
+      //       data: {
+      //         trade: newTrade._id,
+      //       },
+      //     })
 
-          await blockDeltaBuyer.save()
-          await blockDeltaSeller.save()
+      //     const blockDeltaSeller = new BlockDelta({
+      //       user: instrument.user,
+      //       instrument: instrument._id,
+      //       type: 'fresh-sell',
+      //       quantity: -newTrade.quantity,
+      //       data: {
+      //         trade: newTrade._id,
+      //       },
+      //     })
 
-          await User.updateOne(
-            { _id: newOrder.user },
-            { $inc: { cash: -amountMatched } }
-          )
-          await User.updateOne(
-            { _id: instrument.user },
-            { $inc: { cash: amountMatched - totalCommission } }
-          )
-          await Transaction.insertMany([
-            {
-              user: newOrder.user,
-              amount: -amountMatched,
-              type: 'trade-buy',
-              trade: newTrade._id,
-            },
-            {
-              user: instrument.user,
-              amount: amountMatched - totalCommission,
-              type: 'trade-fresh-sell',
-              trade: newTrade._id,
-            },
-          ])
-        }
-      }
+      //     await blockDeltaBuyer.save()
+      //     await blockDeltaSeller.save()
+
+      //     await User.updateOne(
+      //       { _id: newOrder.user },
+      //       { $inc: { cash: -amountMatched } }
+      //     )
+      //     await User.updateOne(
+      //       { _id: instrument.user },
+      //       { $inc: { cash: amountMatched - totalCommission } }
+      //     )
+      //     await Transaction.insertMany([
+      //       {
+      //         user: newOrder.user,
+      //         amount: -amountMatched,
+      //         type: 'trade-buy',
+      //         trade: newTrade._id,
+      //       },
+      //       {
+      //         user: instrument.user,
+      //         amount: amountMatched - totalCommission,
+      //         type: 'trade-fresh-sell',
+      //         trade: newTrade._id,
+      //       },
+      //     ])
+      //   }
+      // }
 
       if (qtyMatched === newOrder.quantity) {
         newOrder.status = 'executed'
