@@ -95,3 +95,39 @@ exports.upload_delete = (req, res) => {
       }
     )
 }
+
+// eslint-disable-next-line consistent-return
+exports.upload_signedURL_get = (req, res) => {
+  const { type } = req.query
+
+  if (!type) {
+    return res.status(400).send('Missing type')
+  }
+
+  if (type === 'put-glimpse-original') {
+    const filename = `${uuidv4()}.webm`
+    const params = {
+      Bucket: S3_BUCKET,
+      Key: `original/${filename}`,
+      Expires: 300,
+      ContentType: 'video/webm',
+      ACL: 'public-read',
+    }
+
+    s3.getSignedUrl('putObject', params, (err, url) => {
+      if (err) {
+        console.error(err)
+        return res.status(500).send(err)
+      }
+
+      return res.send({
+        url,
+        key: params.Key,
+        path: `https://${S3_BUCKET}.s3.amazonaws.com/${params.Key}`,
+        filename,
+      })
+    })
+  } else {
+    return res.status(400).send('Invalid type')
+  }
+}

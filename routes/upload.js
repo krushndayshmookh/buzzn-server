@@ -5,6 +5,7 @@ const router = require('express').Router()
 const uploadController = require('../controllers/upload')
 
 // Controllers -----
+router.get('/signed-url', uploadController.upload_signedURL_get)
 
 router.post('/', uploadController.upload_post)
 
