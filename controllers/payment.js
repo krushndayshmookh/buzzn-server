@@ -100,11 +100,33 @@ exports.validate_post = async (req, res) => {
 
 exports.transactions_get = async (req, res) => {
   const { user } = req.decoded
+  const { type } = req.query
+
+  const query = {
+    user: user._id,
+  }
+
+  const populate = {
+    path: 'payment',
+    select: 'quantity price currency status',
+  }
+
+  if (type) {
+    query.type = type
+
+    if (type === 'payment') {
+      query.payment = { $exists: true }
+    }
+  }
+
+  const sort = {
+    createdAt: -1,
+  }
 
   try {
-    const transactions = await Transaction.find({ user: user._id }).sort({
-      createdAt: -1,
-    })
+    const transactions = await Transaction.find(query)
+      .sort(sort)
+      .populate(populate)
 
     return res.send(transactions)
   } catch (err) {
