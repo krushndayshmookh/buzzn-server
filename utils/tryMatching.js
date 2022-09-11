@@ -9,7 +9,7 @@ const {
   Transaction,
 } = require('../models')
 
-const FRESH_SYSTEM_RATE = 0.8
+const FRESH_SYSTEM_RATE = 0.2
 const FRESH_OWNER_RATE = 0
 
 const FLOAT_SYSTEM_RATE = 0.005
