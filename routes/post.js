@@ -15,6 +15,8 @@ router.post('/:postId/comments', validateToken, postController.comments_post)
 
 router.get('/:postId/comments', validateToken, postController.comments_get)
 
+router.get('/:postId/comments/:commentId', validateToken, postController.comment_single_get)
+
 router.put('/:postId/likes', validateToken, postController.like_put)
 
 router.get('/:postId/likes/count', postController.likesCount_get)
@@ -24,6 +26,8 @@ router.get(
   validateToken,
   postController.hasLiked_get
 )
+
+router.get('/:postId/likes/:likeId', postController.like_single_get)
 
 router.delete('/:postId/likes', validateToken, postController.like_delete)
 

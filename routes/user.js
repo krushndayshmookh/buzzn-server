@@ -46,6 +46,11 @@ router.get(
 
 router.put('/:userId/followers', validateToken, userController.follower_put)
 
+router.get(
+  '/:username/followers/:followerId',
+  userController.follower_single_get
+)
+
 router.delete(
   '/:userId/followers',
   validateToken,

@@ -2,6 +2,7 @@ const moment = require('moment-timezone')
 const { User, Follower, Instrument, Watchlist, Tick } = require('../models')
 const stringSort = require('../utils/stringSort')
 const { generateToken } = require('./auth')
+const createNotification = require('../utils/createNotification')
 
 exports.list_get = async (req, res) => {
   const { type } = req.query
@@ -214,6 +215,36 @@ exports.followers_get = async (req, res) => {
   }
 }
 
+exports.follower_single_get = async (req, res) => {
+  const { followerId } = req.params
+
+  try {
+    const query = {
+      _id: followerId,
+    }
+
+    const populate = [
+      {
+        path: 'follower',
+        select: 'username avatar isVerified',
+      },
+    ]
+
+    const result = await Follower.findOne(query).populate(populate)
+
+    if (!result) {
+      return res.status(404).send({
+        error: 'Follower not found',
+      })
+    }
+
+    return res.send(result.follower)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
 exports.following_get = async (req, res) => {
   const { username } = req.params
 
@@ -308,6 +339,11 @@ exports.follower_put = async (req, res) => {
     })
 
     await newFollower.save()
+
+    await createNotification(userId, 'follow', {
+      user: user._id,
+      follower: newFollower._id,
+    })
 
     return res.send({ success: true })
   } catch (err) {

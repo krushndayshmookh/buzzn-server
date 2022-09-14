@@ -14,6 +14,7 @@ router.use('/api/instruments', require('./instrument'))
 router.use('/api/orders', require('./order'))
 router.use('/api/bookmarks', require('./bookmark'))
 router.use('/api/payments', require('./payment'))
+router.use('/api/notifications', require('./notification'))
 
 router.get('/api', (req, res) => {
   res.send('Please read documentation for the API.')

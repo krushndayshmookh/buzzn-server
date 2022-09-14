@@ -10,6 +10,8 @@ const {
   Holding,
 } = require('../models')
 
+const createNotification = require('../utils/createNotification')
+
 const BLOCK_COUNTS = require('../configs/PostTypeBlockCounts')
 
 const { PROCESSING_SERVER_URL } = process.env
@@ -232,6 +234,12 @@ exports.like_put = async (req, res) => {
 
     await newLike.save()
 
+    await createNotification(post.user, 'like', {
+      post: postId,
+      user: user._id,
+      like: newLike._id,
+    })
+
     return res.send({
       success: true,
     })
@@ -408,6 +416,12 @@ exports.comments_post = async (req, res) => {
 
     await newComment.save()
 
+    await createNotification(post.user, 'comment', {
+      post: postId,
+      user: user._id,
+      comment: newComment._id,
+    })
+
     return res.send({
       success: true,
     })
@@ -443,6 +457,60 @@ exports.comments_get = async (req, res) => {
       .sort({ createdAt: -1 })
 
     return res.send(comments)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.like_single_get = async (req, res) => {
+  const { likeId } = req.params
+
+  try {
+    const like = await Like.findById(likeId).populate([
+      {
+        path: 'user',
+        select: 'username avatar isVerified',
+      },
+      {
+        path: 'post',
+      },
+    ])
+
+    if (!like) {
+      return res.status(404).send({
+        error: 'Like not found',
+      })
+    }
+
+    return res.send(like)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.comment_single_get = async (req, res) => {
+  const { commentId } = req.params
+
+  try {
+    const comment = await Comment.findById(commentId).populate([
+      {
+        path: 'user',
+        select: 'username avatar isVerified',
+      },
+      {
+        path: 'post',
+      },
+    ])
+
+    if (!comment) {
+      return res.status(404).send({
+        error: 'Comment not found',
+      })
+    }
+
+    return res.send(comment)
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })
