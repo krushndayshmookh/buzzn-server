@@ -191,7 +191,7 @@ exports.create_post = async (req, res) => {
     await blockDelta.save()
 
     await axios
-      .post(`${PROCESSING_SERVER_URL}/api/process/post/${type}`, {
+      .post(`${PROCESSING_SERVER_URL}/process/post/${type}`, {
         post: newPost._id,
       })
       .catch(console.error)

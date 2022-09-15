@@ -27,7 +27,7 @@ async function run() {
         await post.save()
 
         axios
-          .post(`${PROCESSING_SERVER_URL}/api/process/post/image`, {
+          .post(`${PROCESSING_SERVER_URL}/process/post/image`, {
             post: post._id,
           })
           .catch(console.error)
