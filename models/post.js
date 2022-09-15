@@ -78,6 +78,10 @@ const PostSchema = new Schema(
         originalFilename: {
           type: String,
         },
+        isMuted:{
+          type: Boolean,
+          default: false,
+        },
         processing: {
           status: {
             type: String,
