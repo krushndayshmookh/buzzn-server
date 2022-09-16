@@ -16,12 +16,8 @@ router.use('/api/bookmarks', require('./bookmark'))
 router.use('/api/payments', require('./payment'))
 router.use('/api/notifications', require('./notification'))
 
-router.get('/api', (req, res) => {
+router.get('/*', (req, res) => {
   res.send('Please read documentation for the API.')
-})
-
-router.get('*', (req, res) => {
-  res.redirect('/api')
 })
 
 module.exports = router
