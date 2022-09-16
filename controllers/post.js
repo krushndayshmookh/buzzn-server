@@ -517,7 +517,7 @@ exports.comment_single_get = async (req, res) => {
   }
 }
 
-exports.delete_single_post = async (req, res) => {
+exports.delete_single_delete = async (req, res) => {
   const { postId } = req.params
 
   try {
