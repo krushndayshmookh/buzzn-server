@@ -45,6 +45,9 @@ router.delete(
   postController.bookmark_delete
 )
 
+router.delete('/:postId', validateTokenOptional, postController.delete_single_get)
+
+
 router.get('*', (req, res) => {
   res.send('Please read documentation for the API. (post)')
 })

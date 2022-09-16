@@ -516,3 +516,27 @@ exports.comment_single_get = async (req, res) => {
     return res.status(500).send({ err })
   }
 }
+
+exports.delete_single_post = async (req, res) => {
+  const { postId } = req.params
+
+  try {
+    const post = await Post.findById(postId)
+
+    if (!post) {
+      return res.status(404).send({
+        error: 'Post not found',
+      })
+    }
+
+    post.isDeleted = true
+    await post.save()
+
+    return res.send({
+      success: true,
+    })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
