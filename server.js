@@ -2,7 +2,7 @@ const path = require('path')
 
 require('dotenv').config({ path: path.join(__dirname, '.env') })
 
-if(process.env.NODE_ENV !== 'development') {
+if (process.env.NODE_ENV !== 'development') {
   // eslint-disable-next-line global-require
   require('newrelic')
 }
@@ -48,9 +48,7 @@ mongoose.Promise = global.Promise
 const db = mongoose.connection
 db.on('error', console.error.bind(console, 'MongoDB connection error:'))
 
-if (process.env.NODE_ENV === 'development') {
-  app.use(logger('dev'))
-}
+app.use(logger('dev'))
 
 app.use(cors())
 
