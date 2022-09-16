@@ -96,7 +96,11 @@ app.use(express.static(PUBLIC_DIR))
 //   })
 // })
 
-app.use('/', require('./routes'))
+app.use('/api', require('./routes'))
+
+app.get('*', (req, res) => {
+  res.send('Please read documentation for the API.')
+})
 
 // app.get("*", function (req, res) {
 //   res.sendFile(PUBLIC_DIR + "/index.html");
