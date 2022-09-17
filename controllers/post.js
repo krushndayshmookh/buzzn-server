@@ -8,6 +8,7 @@ const {
   Bookmark,
   Comment,
   Holding,
+  Follower,
 } = require('../models')
 
 const createNotification = require('../utils/createNotification')
@@ -57,6 +58,19 @@ exports.fetch_get = async (req, res) => {
   const select = '_id'
 
   try {
+    // show posts from users whom you follow
+    let following = await Follower.find({ follower: user._id })
+      .select('user')
+      .lean()
+
+    if (following.length > 0) {
+      following = following.map(f => f.user)
+
+      query.user = {
+        $in: following,
+      }
+    }
+
     let posts = []
 
     if (page && limit) {
