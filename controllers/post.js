@@ -72,6 +72,8 @@ exports.fetch_get = async (req, res) => {
         query.user = {
           $in: following,
         }
+
+        query.user.$in.push(decoded.user._id)
       }
     }
 
