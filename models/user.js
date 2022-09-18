@@ -64,6 +64,13 @@ const UserSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    verificationPending: {
+      type: Boolean,
+      default: false,
+    },
+    verificationData: {
+      type: Schema.Types.Mixed,
+    },
     about: {
       type: Object,
     },
@@ -101,7 +108,7 @@ const UserSchema = new Schema(
     },
     customer: {
       type: String,
-    }
+    },
   },
   {
     toJSON: {

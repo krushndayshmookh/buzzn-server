@@ -4,8 +4,10 @@ const router = require('express').Router()
 
 const uploadController = require('../controllers/upload')
 
+const validateToken = require('../middlewares/validateToken')
+
 // Controllers -----
-router.get('/signed-url', uploadController.upload_signedURL_get)
+router.get('/signed-url', validateToken, uploadController.upload_signedURL_get)
 
 router.post('/', uploadController.upload_post)
 

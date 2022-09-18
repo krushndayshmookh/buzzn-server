@@ -89,7 +89,7 @@ exports.profile_get = async (req, res) => {
   try {
     const existingUser = await User.findOne(query)
       .select(
-        'username firstName lastName bio avatar categories isVerified about cash bonusCash chips referralCode'
+        'username firstName lastName bio avatar categories isVerified verificationPending about cash bonusCash chips referralCode'
       )
       .lean({ virtuals: true })
 
@@ -505,6 +505,31 @@ exports.user_watchlist_delete = async (req, res) => {
     const result = await Watchlist.deleteOne(query)
 
     return res.send(result)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.user_verify_post = async (req, res) => {
+  const { user } = req.decoded
+  const { selfie, pan } = req.body
+
+  try {
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          verificationPending: true,
+          verificationData: {
+            selfie,
+            pan,
+          },
+        },
+      }
+    )
+
+    return res.send({ success: true })
   } catch (err) {
     console.error({ err })
     return res.status(500).send({ err })

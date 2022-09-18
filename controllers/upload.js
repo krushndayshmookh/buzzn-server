@@ -99,35 +99,49 @@ exports.upload_delete = (req, res) => {
 // eslint-disable-next-line consistent-return
 exports.upload_signedURL_get = (req, res) => {
   const { type } = req.query
+  const { user } = req.decoded
 
   if (!type) {
     return res.status(400).send('Missing type')
   }
 
-  if (type === 'put-glimpse-original') {
-    const filename = `${uuidv4()}.webm`
-    const params = {
-      Bucket: S3_BUCKET,
-      Key: `original/${filename}`,
-      Expires: 300,
-      ContentType: 'video/webm',
-      ACL: 'public-read',
+  const params = {
+    Bucket: S3_BUCKET,
+    Expires: 300,
+    ACL: 'public-read',
+  }
+
+  switch (type) {
+    case 'put-glimpse-original':
+      params.Key = `original/${uuidv4()}.webm`
+      params.ContentType = 'video/webm'
+      break
+
+    case 'put-verification-selfie':
+      params.Key = `verification/selfie/${user._id}.png`
+      params.ContentType = 'image/png'
+      break
+
+    case 'put-verification-pan':
+      params.Key = `verification/pan/${user._id}.png`
+      params.ContentType = 'image/png'
+      break
+
+    default:
+      return res.status(400).send('Invalid type')
+  }
+
+  s3.getSignedUrl('putObject', params, (err, url) => {
+    if (err) {
+      console.error(err)
+      return res.status(500).send(err)
     }
 
-    s3.getSignedUrl('putObject', params, (err, url) => {
-      if (err) {
-        console.error(err)
-        return res.status(500).send(err)
-      }
-
-      return res.send({
-        url,
-        key: params.Key,
-        path: `https://${S3_BUCKET}.s3.amazonaws.com/${params.Key}`,
-        filename,
-      })
+    return res.send({
+      url,
+      key: params.Key,
+      path: `https://${S3_BUCKET}.s3.amazonaws.com/${params.Key}`,
+      filename: params.Key.split('/').pop(),
     })
-  } else {
-    return res.status(400).send('Invalid type')
-  }
+  })
 }
