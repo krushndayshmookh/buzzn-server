@@ -61,7 +61,7 @@ exports.fetch_get = async (req, res) => {
 
   try {
     // show posts from users whom you follow
-    if (!user && decoded.user) {
+    if (!user && decoded?.user) {
       let following = await Follower.find({ follower: decoded.user._id })
         .select('user')
         .lean()
