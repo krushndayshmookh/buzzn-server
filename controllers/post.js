@@ -18,9 +18,9 @@ const BLOCK_COUNTS = require('../configs/PostTypeBlockCounts')
 const { PROCESSING_SERVER_URL } = process.env
 
 exports.fetch_get = async (req, res) => {
-  const { page, limit, type, fetchStart } = req.query
+  const { page, limit, user, type, fetchStart } = req.query
 
-  const { user } = req.decoded
+  const { user: loggedUser } = req.decoded
 
   const query = {
     isDeleted: false,
@@ -61,8 +61,8 @@ exports.fetch_get = async (req, res) => {
 
   try {
     // show posts from users whom you follow
-    if (user) {
-      let following = await Follower.find({ follower: user._id })
+    if (!user && loggedUser) {
+      let following = await Follower.find({ follower: loggedUser._id })
         .select('user')
         .lean()
 
