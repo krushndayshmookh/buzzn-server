@@ -7,7 +7,7 @@ const validateTokenOptional = require('../middlewares/validateTokenOptional')
 
 router.post('/', validateToken, postController.create_post)
 
-router.get('/', postController.fetch_get)
+router.get('/', validateTokenOptional, postController.fetch_get)
 
 router.get('/:postId', validateTokenOptional, postController.fetch_single_get)
 
@@ -49,11 +49,7 @@ router.delete(
   postController.bookmark_delete
 )
 
-router.delete(
-  '/:postId',
-  validateToken,
-  postController.delete_single_delete
-)
+router.delete('/:postId', validateToken, postController.delete_single_delete)
 
 router.get('*', (req, res) => {
   res.send('Please read documentation for the API. (post)')
