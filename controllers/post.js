@@ -9,6 +9,7 @@ const {
   Comment,
   Holding,
   Follower,
+  User,
 } = require('../models')
 
 const createNotification = require('../utils/createNotification')
@@ -215,6 +216,45 @@ exports.create_post = async (req, res) => {
         post: newPost._id,
       })
       .catch(console.error)
+
+    const mentions = []
+
+    const regex = /@([a-zA-Z0-9_]+)/g
+
+    if (content?.text) {
+      let match = regex.exec(content.text)
+      while (match != null) {
+        mentions.push(match[1])
+        match = regex.exec(content.text)
+      }
+    } else if (content.audio) {
+      let match = regex.exec(content.title)
+      while (match != null) {
+        mentions.push(match[1])
+        match = regex.exec(content.title)
+      }
+    } else {
+      let match = regex.exec(content[type].caption)
+      while (match != null) {
+        mentions.push(match[1])
+        match = regex.exec(content[type].caption)
+      }
+    }
+
+    if (mentions.length > 0) {
+      const users = await User.find({ username: { $in: mentions } }).select(
+        '_id'
+      )
+
+      const notificationPromises = users.map(mentionedUser =>
+        createNotification(mentionedUser, 'mention', {
+          post: newPost._id,
+          user: user._id,
+        })
+      )
+
+      await Promise.all(notificationPromises)
+    }
 
     return res.status(201).send(newPost)
   } catch (err) {
