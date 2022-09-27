@@ -1,8 +1,14 @@
 const { User, Transaction } = require('../models')
 
 exports.users_get = async (req, res) => {
+  const { verificationPending } = req.query
+
+  const query = {}
+
+  if (verificationPending === 'true') query.verificationPending = true
+
   try {
-    const users = await User.find()
+    const users = await User.find(query)
     return res.send(users)
   } catch (err) {
     console.error(err)
