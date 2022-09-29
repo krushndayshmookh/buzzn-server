@@ -6,16 +6,17 @@ const { Post } = require('../../../models')
 async function run() {
   try {
     const posts = await Post.find({
-      type: 'glimpse'
+      type: 'image'
     })
+    
+    console.info(`Found ${posts.length} posts.`)
 
     for (let i = 0; i < posts.length; i++) {
       setTimeout(async () => {
         const post = posts[i]
         try {
           await axios.post(
-            // `https://processing.keepbuzzn.com/process/post/${post.type}`,
-            `http://ec2-43-205-224-206.ap-south-1.compute.amazonaws.com/process/post/${post.type}`,
+            `https://processing.keepbuzzn.com/process/post/${post.type}`,
             {
               post: post._id,
             }
