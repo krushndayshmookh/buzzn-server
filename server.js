@@ -25,7 +25,7 @@ const http = require('http')
 const packageJSON = require('./package.json')
 
 const PORT = process.env.PORT || 3000
-const { MONGODB_URI } = process.env
+const { MONGODB_URI, MONGODB_DBNAME } = process.env
 const { UPLOADS_DIR } = process.env
 const PUBLIC_DIR = path.join(__dirname, process.env.PUBLIC_DIR)
 
@@ -42,6 +42,7 @@ mongoose.plugin(mongooseLeanVirtuals)
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  dbName: MONGODB_DBNAME,
 })
 mongoose.Promise = global.Promise
 
