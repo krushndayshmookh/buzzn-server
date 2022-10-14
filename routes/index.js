@@ -4,7 +4,7 @@ const allowRoot = require('../middlewares/allowRoot')
 const validateToken = require('../middlewares/validateToken')
 
 router.use('/auth', require('./auth'))
-router.use('/admin', /* validateToken, */ allowRoot, require('./admin'))
+router.use('/admin', validateToken, allowRoot, require('./admin'))
 router.use('/users', require('./user'))
 router.use('/utils', require('./util'))
 router.use('/uploads', require('./upload'))

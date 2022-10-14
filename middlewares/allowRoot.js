@@ -1,9 +1,8 @@
 const allowRoot = async (req, res, next) => {
   // eslint-disable-next-line no-unsafe-optional-chaining
-  const user = req.decoded?.user
-  const { overrideKey } = req.query
+  const { user } = req.decoded
 
-  if (overrideKey === process.env.OVERRIDE_KEY || user?.type === 'root') {
+  if (user?.type === 'root') {
     next()
   } else {
     const result = {
