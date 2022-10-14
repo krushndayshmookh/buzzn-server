@@ -6,6 +6,8 @@ const userController = require('../controllers/user')
 
 // Controllers -----
 
+router.post('/messaging-tokens', validateToken, userController.user_messagingToken_post)
+
 router.post('/verify', validateToken, userController.user_verify_post)
 
 router.get('/profile', validateToken, userController.profile_get)

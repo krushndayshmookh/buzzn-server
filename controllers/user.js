@@ -1,5 +1,12 @@
 const moment = require('moment-timezone')
-const { User, Follower, Instrument, Watchlist, Tick } = require('../models')
+const {
+  User,
+  Follower,
+  Instrument,
+  Watchlist,
+  Tick,
+  MessagingToken,
+} = require('../models')
 const stringSort = require('../utils/stringSort')
 const { generateToken } = require('./auth')
 const createNotification = require('../utils/createNotification')
@@ -528,6 +535,25 @@ exports.user_verify_post = async (req, res) => {
         },
       }
     )
+
+    return res.send({ success: true })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.user_messagingToken_post = async (req, res) => {
+  const { user } = req.decoded
+  const { token } = req.body
+
+  try {
+    const newToken = new MessagingToken({
+      user: user._id,
+      token,
+    })
+
+    await newToken.save()
 
     return res.send({ success: true })
   } catch (err) {
