@@ -8,6 +8,8 @@ const userController = require('../controllers/user')
 
 router.post('/messaging-tokens', validateToken, userController.user_messagingToken_post)
 
+router.delete('/messaging-tokens', validateToken, userController.user_messagingToken_delete)
+
 router.post('/verify', validateToken, userController.user_verify_post)
 
 router.get('/profile', validateToken, userController.profile_get)

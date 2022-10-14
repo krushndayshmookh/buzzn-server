@@ -561,3 +561,20 @@ exports.user_messagingToken_post = async (req, res) => {
     return res.status(500).send({ err })
   }
 }
+
+exports.user_messagingToken_delete = async (req, res) => {
+  const { user } = req.decoded
+  const { token } = req.body
+
+  try {
+    const result = await MessagingToken.deleteOne({
+      user: user._id,
+      token,
+    })
+
+    return res.send(result)
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
