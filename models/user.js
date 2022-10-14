@@ -26,12 +26,12 @@ const UserSchema = new Schema(
     authProvider: {
       type: String,
       required: true,
-      enum: ['local', 'google', 'facebook'],
+      enum: ['local', 'firebase'],
       default: 'local',
     },
     password: {
       type: String,
-      required: true,
+      // required: true,
     },
     firstName: {
       type: String,

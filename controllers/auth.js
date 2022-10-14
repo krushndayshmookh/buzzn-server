@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken')
 
 const { User, Instrument } = require('../models')
 
+const firebaseAdmin = require('../init-firebase')
+
 const JWTOptions = {
   expiresIn: process.env.JWT_EXPIRES,
   issuer: process.env.JWT_ISSUER,
@@ -10,71 +12,117 @@ const { JWT_SECRET } = process.env
 
 const generateToken = user => jwt.sign({ user }, JWT_SECRET, JWTOptions)
 
+const createNewUser = async userData => {
+  const { referrer } = userData
+
+  const newUser = new User(userData)
+
+  const newInstrument = new Instrument({
+    user: newUser._id,
+    minted: 0,
+    symbol: `BLOCK-${newUser.username}`,
+  })
+
+  await newUser.save()
+  await newInstrument.save()
+
+  if (referrer) {
+    const referrerUser = await User.findOne({ referralCode: referrer })
+    if (referrerUser) {
+      referrerUser.bonusCash += 50
+      await referrerUser.save()
+    }
+  }
+
+  return newUser
+}
+
 exports.generateToken = generateToken
 
 exports.login_post = async (req, res) => {
-  const { email, password } = req.body
+  const { email, password, authProvider = 'local', idToken } = req.body
 
-  User.findOne({ email })
-    .select(
-      'username firstName lastName bio avatar categories isVerified password'
-    )
-    .lean()
-    .then(user => {
-      if (!user) {
+  const query = { email }
+
+  let decodedToken
+
+  if (authProvider === 'firebase') {
+    if (!idToken) {
+      return res.status(400).json({ error: 'Missing idToken' })
+    }
+
+    try {
+      decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken)
+      const { email: googleEmail } = decodedToken
+      query.email = googleEmail
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid idToken' })
+    }
+  }
+
+  if (authProvider === 'local') {
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Missing email or password' })
+    }
+    query.password = password
+  }
+
+  try {
+    let user = await User.findOne(query)
+      .select(
+        'username firstName lastName bio avatar categories isVerified email'
+      )
+      .lean()
+
+    if (!user) {
+      if (authProvider === 'local') {
         return res
           .status(401)
           .send({ success: false, message: 'Invalid email' })
       }
 
-      if (user.password === password) {
-        const cleanUser = { ...user }
-        delete cleanUser.password
-
-        const token = generateToken(cleanUser)
-
-        return res.send({
-          success: true,
-          token,
-          user: cleanUser,
+      if (authProvider === 'firebase') {
+        const newUser = await createNewUser({
+          username: decodedToken.name.toLowerCase().replace(' ', '-'),
+          email: decodedToken.email,
+          avatar: decodedToken.picture,
+          authProvider: 'firebase',
         })
-      }
 
-      return res
-        .status(401)
-        .send({ success: false, message: 'Invalid password' })
+        user = {
+          _id: newUser._id,
+          username: newUser.username,
+          email: newUser.email,
+          avatar: newUser.avatar,
+          isVerified: newUser.isVerified,
+        }
+      }
+    }
+
+    const token = generateToken(user)
+
+    return res.send({
+      success: true,
+      token,
+      user,
     })
-    .catch(err => {
-      console.error(err)
-      return res.status(500).send({ err })
-    })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send({ err })
+  }
 }
 
 exports.register_post = async (req, res) => {
   const { username, email, password, referrer } = req.body
 
-  const newUser = new User({
-    username,
-    email,
-    password,
-  })
-
-  const newInstrument = new Instrument({
-    user: newUser._id,
-    minted: 0,
-    symbol: `BLOCK-${username}`,
-  })
-
   try {
-    await newUser.save()
-    await newInstrument.save()
-    if (referrer) {
-      const referrerUser = await User.findOne({ referralCode: referrer })
-      if (referrerUser) {
-        referrerUser.bonusCash += 50
-        await referrerUser.save()
-      }
-    }
+    await createNewUser({
+      username,
+      email,
+      password,
+      referrer,
+    })
+
     return res.status(201).send({ success: true })
   } catch (err) {
     if (err.code === 11000) {
