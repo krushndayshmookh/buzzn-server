@@ -548,6 +548,15 @@ exports.user_messagingToken_post = async (req, res) => {
   const { token } = req.body
 
   try {
+    const exisitingToken = await MessagingToken.findOne({
+      user: user._id,
+      token,
+    })
+
+    if (exisitingToken) {
+      return res.send({ success: true })
+    }
+    
     const newToken = new MessagingToken({
       user: user._id,
       token,
