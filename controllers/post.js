@@ -10,6 +10,7 @@ const {
   Holding,
   Follower,
   User,
+  Report
 } = require('../models')
 
 const createNotification = require('../utils/createNotification')
@@ -591,6 +592,48 @@ exports.delete_single_delete = async (req, res) => {
 
     post.isDeleted = true
     await post.save()
+
+    return res.send({
+      success: true,
+    })
+  } catch (err) {
+    console.error({ err })
+    return res.status(500).send({ err })
+  }
+}
+
+exports.reports_post = async (req, res) => {
+  const { postId } = req.params
+  const { user } = req.decoded
+  const { reason } = req.body
+
+  try {
+    const post = await Post.findById(postId)
+
+    if (!post) {
+      return res.status(404).send({
+        error: 'Post not found',
+      })
+    }
+
+    const report = await Report.findOne({
+      user: user._id,
+      post: postId,
+    })
+
+    if (report) {
+      return res.status(400).send({
+        error: 'You have already reported this post',
+      })
+    }
+
+    const newReport = new Report({
+      user: user._id,
+      post: postId,
+      reason,
+    })
+
+    await newReport.save()
 
     return res.send({
       success: true,
