@@ -16,5 +16,6 @@ router.use('/bookmarks', require('./bookmark'))
 router.use('/payments', require('./payment'))
 router.use('/notifications', require('./notification'))
 router.use('/statistics', require('./statistics'))
+router.use('/reports', require('./report'))
 
 module.exports = router

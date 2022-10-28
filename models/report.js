@@ -6,15 +6,20 @@ const { Schema } = mongoose
 
 const ReportSchema = new Schema(
   {
+    reporter: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: false,
+    },
     user: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      required: false,
     },
     post: {
       type: Schema.Types.ObjectId,
       ref: 'Post',
-      required: true,
+      required: false,
     },
     reason: {
       type: String,

@@ -11,8 +11,6 @@ router.get('/', validateTokenOptional, postController.fetch_get)
 
 router.get('/:postId', validateTokenOptional, postController.fetch_single_get)
 
-router.post('/:postId/reports', validateToken, postController.reports_post)
-
 router.post('/:postId/comments', validateToken, postController.comments_post)
 
 router.get('/:postId/comments', validateToken, postController.comments_get)
