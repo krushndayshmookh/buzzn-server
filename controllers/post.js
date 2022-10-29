@@ -10,6 +10,7 @@ const {
   Holding,
   Follower,
   User,
+  Blocklist,
 } = require('../models')
 
 const createNotification = require('../utils/createNotification')
@@ -39,6 +40,8 @@ exports.fetch_get = async (req, res) => {
 
   if (user) {
     query.user = user
+  } else {
+    query.user = {}
   }
 
   const sort = {
@@ -61,6 +64,22 @@ exports.fetch_get = async (req, res) => {
   const select = '_id'
 
   try {
+    // exclude blocked users
+    if (decoded?.user) {
+      const blockedUsers = await Blocklist.find({
+        $or: [{ user: decoded.user._id }, { blockedUser: decoded.user._id }],
+      })
+
+      const blockedUserIds = blockedUsers.map(u => {
+        if (u.user.toString() === decoded.user._id.toString()) {
+          return u.blockedUser
+        }
+        return u.user
+      })
+
+      query.user.$nin = blockedUserIds
+    }
+
     // show posts from users whom you follow
     if (!user && decoded?.user) {
       let following = await Follower.find({ follower: decoded.user._id })
@@ -70,15 +89,15 @@ exports.fetch_get = async (req, res) => {
       if (following.length > 0) {
         following = following.map(f => f.user)
 
-        query.user = {
-          $in: following,
-        }
+        query.user.$in = following
 
         query.user.$in.push(decoded.user._id)
       }
     }
 
     let posts = []
+
+    console.log('Post Query:', JSON.stringify(query, null, 2))
 
     if (page && limit) {
       posts = await Post.paginate(query, {
