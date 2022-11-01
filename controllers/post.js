@@ -40,7 +40,7 @@ exports.fetch_get = async (req, res) => {
 
   if (user) {
     query.user = user
-  } else {
+  } else if (decoded?.user) {
     query.user = {}
   }
 
