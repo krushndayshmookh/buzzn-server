@@ -176,6 +176,11 @@ exports.fetch_single_get = async (req, res) => {
         })
 
         if (!holding || holding.quantity < post.requireMinShares) {
+          if (post.type === 'image') {
+            if (post.content.image.blurry) {
+              post.blurry = post.content.image.blurry
+            }
+          }
           delete post.content
         }
       }

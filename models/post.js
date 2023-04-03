@@ -61,6 +61,9 @@ const PostSchema = new Schema(
         originalFilename: {
           type: String,
         },
+        blurry: {
+          type: String,
+        },
       },
       glimpse: {
         content: {
