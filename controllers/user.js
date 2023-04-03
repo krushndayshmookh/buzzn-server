@@ -1,4 +1,5 @@
 const moment = require('moment-timezone')
+
 const {
   User,
   Follower,
@@ -7,9 +8,12 @@ const {
   Tick,
   MessagingToken,
 } = require('../models')
+
 const stringSort = require('../utils/stringSort')
 const { generateToken } = require('./auth')
 const createNotification = require('../utils/createNotification')
+
+const firebaseAdmin = require('../init-firebase')
 
 exports.list_get = async (req, res) => {
   const { type } = req.query
@@ -347,10 +351,15 @@ exports.follower_put = async (req, res) => {
 
     await newFollower.save()
 
-    await createNotification(userId, 'follow', {
-      user: user._id,
-      follower: newFollower._id,
-    })
+    await createNotification(
+      userId,
+      'follow',
+      {
+        user: user._id,
+        follower: newFollower._id,
+      },
+      `@${user.username} followed you`
+    )
 
     return res.send({ success: true })
   } catch (err) {
@@ -546,23 +555,33 @@ exports.user_verify_post = async (req, res) => {
 exports.user_messagingToken_post = async (req, res) => {
   const { user } = req.decoded
   const { token } = req.body
+  const device = req.headers['user-agent']
 
   try {
     const exisitingToken = await MessagingToken.findOne({
       user: user._id,
       token,
+      device,
     })
 
     if (exisitingToken) {
       return res.send({ success: true })
     }
-    
+
     const newToken = new MessagingToken({
       user: user._id,
       token,
+      device,
+      topics: [`user-${user._id}`, 'trades', 'posts', 'messages'],
     })
 
     await newToken.save()
+
+    await Promise.all(
+      newToken.topics.map(topic =>
+        firebaseAdmin.messaging().subscribeToTopic(token, topic)
+      )
+    )
 
     return res.send({ success: true })
   } catch (err) {

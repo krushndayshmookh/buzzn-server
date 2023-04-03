@@ -17,6 +17,14 @@ const MessagingTokenSchema = new Schema(
       ref: 'User',
       required: true,
     },
+    topics: {
+      type: [String],
+      default: [],
+    },
+    device: {
+      type: String,
+      required: true,
+    },
   },
   {
     toJSON: {
@@ -31,7 +39,10 @@ const MessagingTokenSchema = new Schema(
 
 MessagingTokenSchema.plugin(mongoosePaginate)
 
-const MessagingTokenModel = mongoose.model('MessagingToken', MessagingTokenSchema)
+const MessagingTokenModel = mongoose.model(
+  'MessagingToken',
+  MessagingTokenSchema
+)
 
 module.exports = {
   name: 'MessagingToken',

@@ -275,10 +275,15 @@ exports.create_post = async (req, res) => {
       )
 
       const notificationPromises = users.map(mentionedUser =>
-        createNotification(mentionedUser, 'mention', {
-          post: newPost._id,
-          user: user._id,
-        })
+        createNotification(
+          mentionedUser,
+          'mention',
+          {
+            post: newPost._id,
+            user: user._id,
+          },
+          `${user.username} mentioned you in a post`
+        )
       )
 
       await Promise.all(notificationPromises)
@@ -322,11 +327,16 @@ exports.like_put = async (req, res) => {
 
     await newLike.save()
 
-    await createNotification(post.user, 'like', {
-      post: postId,
-      user: user._id,
-      like: newLike._id,
-    })
+    await createNotification(
+      post.user,
+      'like',
+      {
+        post: postId,
+        user: user._id,
+        like: newLike._id,
+      },
+      `${user.username} liked your post`
+    )
 
     return res.send({
       success: true,
@@ -504,11 +514,16 @@ exports.comments_post = async (req, res) => {
 
     await newComment.save()
 
-    await createNotification(post.user, 'comment', {
-      post: postId,
-      user: user._id,
-      comment: newComment._id,
-    })
+    await createNotification(
+      post.user,
+      'comment',
+      {
+        post: postId,
+        user: user._id,
+        comment: newComment._id,
+      },
+      `${user.username} commented on your post`
+    )
 
     return res.send({
       success: true,
