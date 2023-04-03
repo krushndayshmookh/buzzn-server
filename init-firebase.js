@@ -3,7 +3,10 @@ const admin = require('firebase-admin')
 const serviceAccount = require('./buzzn-credentials.json')
 
 serviceAccount.private_key_id = process.env.FIREBASE_PRIVATE_KEY_ID
-serviceAccount.private_key = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+serviceAccount.private_key = process.env.FIREBASE_PRIVATE_KEY.replace(
+  /\\n/g,
+  '\n'
+)
 
 const appConfig = {
   credential: admin.credential.cert(serviceAccount),
