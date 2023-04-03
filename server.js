@@ -15,12 +15,10 @@ const mongooseLeanVirtuals = require('mongoose-lean-virtuals')
 
 const cors = require('cors')
 
-const logger = require('morgan')
-
 // const multer = require('multer')
 
 const http = require('http')
-// const socketIO = require('socket.io')
+const socketIO = require('socket.io')
 
 const packageJSON = require('./package.json')
 
@@ -30,12 +28,17 @@ const { UPLOADS_DIR } = process.env
 const PUBLIC_DIR = path.join(__dirname, process.env.PUBLIC_DIR)
 
 const app = express()
+app.use(cors())
 
 const server = http.createServer(app)
 
-// const io = socketIO(server)
+const io = new socketIO.Server(server, {
+  cors: {
+    origin: '*',
+  },
+})
 
-// global.io = io
+global.io = io
 mongoose.plugin(mongoosePaginate)
 mongoose.plugin(mongooseLeanVirtuals)
 
@@ -49,9 +52,11 @@ mongoose.Promise = global.Promise
 const db = mongoose.connection
 db.on('error', console.error.bind(console, 'MongoDB connection error:'))
 
-// app.use(logger('dev'))
-
-app.use(cors())
+if (process.env.NODE_ENV === 'development') {
+  // eslint-disable-next-line global-require
+  const logger = require('morgan')
+  app.use(logger('dev'))
+}
 
 app.use(
   express.urlencoded({
@@ -88,12 +93,7 @@ app.use(express.static(PUBLIC_DIR))
 // app.set('view engine', 'pug')
 // app.set('views', './views')
 
-// io.on('connection', client => {
-//   console.info('Client connected.')
-//   client.on('disconnect', () => {
-//     console.info('Client disconnected.')
-//   })
-// })
+io.on('connection', require('./handlers'))
 
 app.use('/api', require('./routes'))
 
@@ -112,7 +112,7 @@ require('./utils/mkdirSync')(directories)
 // display server information on startup
 async function displayServerInfo() {
   const { name, version: serverVersion } = packageJSON
-  const { name: dbName } = db
+  const { $dbName: dbName } = db
   const now = new Date()
 
   console.info('============================================================')
