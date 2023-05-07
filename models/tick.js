@@ -9,6 +9,7 @@ const TickSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Instrument',
       required: true,
+      index: true,
     },
     price: {
       type: Number,
@@ -19,6 +20,7 @@ const TickSchema = new Schema(
       type: Date,
       required: true,
       default: Date.now,
+      index: true,
     },
   },
   {
