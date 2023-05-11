@@ -12,6 +12,10 @@ router.post('/login', authController.login_post)
 
 router.post('/register', authController.register_post)
 
+router.post('/forgot-password', authController.forgotPassword_post)
+
+router.post('/reset-password', authController.resetPassword_post)
+
 router.get('/', (req, res) => {
   res.send('Please read documentation for the API. (auth)')
 })

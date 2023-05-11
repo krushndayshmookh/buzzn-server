@@ -4,6 +4,8 @@ const { User, Instrument } = require('../models')
 
 const firebaseAdmin = require('../init-firebase')
 
+const { sendForgotPasswordMail } = require('../utils/sendTemplatedMail')
+
 const JWTOptions = {
   expiresIn: process.env.JWT_EXPIRES,
   issuer: process.env.JWT_ISSUER,
@@ -76,9 +78,11 @@ exports.login_post = async (req, res) => {
 
     if (!user) {
       if (authProvider === 'local') {
-        return res
-          .status(401)
-          .send({ success: false, message: 'Invalid email' })
+        return res.status(401).send({
+          success: false,
+          message:
+            'Invalid email or auth provider. Maybe try signing in with Google instead?',
+        })
       }
 
       if (authProvider === 'firebase') {
@@ -146,4 +150,46 @@ exports.login_status_get = async (req, res) => {
   }
 
   return res.send({ success: true, user })
+}
+
+exports.forgotPassword_post = async (req, res) => {
+  const { email } = req.body
+
+  try {
+    const user = await User.findOne({ email }).lean()
+
+    console.log(user)
+
+    if (!user) {
+      return res.status(404).send({ success: false, message: 'User not found' })
+    }
+
+    const resetToken = generateToken({ _id: user._id, email })
+
+    await sendForgotPasswordMail({
+      username: user.username,
+      email,
+      token: resetToken,
+    })
+
+    return res.send({ success: true })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send({ err })
+  }
+}
+
+exports.resetPassword_post = async (req, res) => {
+  const { token, password } = req.body
+
+  try {
+    const { _id, email } = jwt.verify(token, JWT_SECRET)
+
+    await User.updateOne({ _id, email }, { $set: { password } })
+
+    return res.send({ success: true })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).send({ err })
+  }
 }
