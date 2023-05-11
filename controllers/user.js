@@ -1,4 +1,7 @@
 const moment = require('moment-timezone')
+const axios = require('axios')
+
+const { PROCESSING_SERVER_URL } = process.env
 
 const {
   User,
@@ -144,6 +147,8 @@ exports.update_put = async (req, res) => {
 
   const { username, firstName, lastName, bio, avatar } = req.body
 
+  const oldAvatar = user.avatar
+
   const updates = {
     username,
     firstName,
@@ -159,6 +164,14 @@ exports.update_put = async (req, res) => {
       },
       updates
     )
+
+    if (oldAvatar !== avatar) {
+      await axios
+        .post(`${PROCESSING_SERVER_URL}/process/user/avatar`, {
+          user: user._id,
+        })
+        .catch(console.error)
+    }
 
     return res.send({ success: true })
   } catch (err) {
