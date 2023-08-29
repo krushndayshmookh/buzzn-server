@@ -72,24 +72,6 @@ app.use(
 
 app.use(express.static(PUBLIC_DIR))
 
-// const storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     cb(null, path.join(__dirname, UPLOADS_DIR))
-//   },
-//   filename: function (req, file, cb) {
-//     cb(
-//       null,
-//       file.originalname.replace(/ /g, '_') +
-//         '-' +
-//         new Date().valueOf() +
-//         path.extname(file.originalname)
-//     )
-//   }
-// })
-
-// const upload = multer({ storage })
-// global.upload = upload
-
 // app.set('view engine', 'pug')
 // app.set('views', './views')
 
