@@ -1,4 +1,4 @@
-const { Holding, Instrument } = require('../models')
+const { Holding } = require('../models')
 
 exports.holdings_get = async (req, res) => {
   const { user } = req.decoded

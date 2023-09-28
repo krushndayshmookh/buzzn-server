@@ -6,9 +6,17 @@ const userController = require('../controllers/user')
 
 // Controllers -----
 
-router.post('/messaging-tokens', validateToken, userController.user_messagingToken_post)
+router.post(
+  '/messaging-tokens',
+  validateToken,
+  userController.user_messagingToken_post
+)
 
-router.delete('/messaging-tokens', validateToken, userController.user_messagingToken_delete)
+router.delete(
+  '/messaging-tokens',
+  validateToken,
+  userController.user_messagingToken_delete
+)
 
 router.post('/verify', validateToken, userController.user_verify_post)
 

@@ -3,7 +3,7 @@ const moment = require('moment-timezone')
 const { User } = require('../models')
 
 exports.users_get = async (req, res) => {
-  const NOW = moment().tz('Asia/Kolkata')
+  // const NOW = moment().tz('Asia/Kolkata')
 
   try {
     const usersOverMonth = await User.aggregate([

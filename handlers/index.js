@@ -8,10 +8,10 @@ const socketHandler = client => {
   client.on('login', userId => {
     userSocketIdMap[userId] = client.id
 
-    console.table(userSocketIdMap)
+    // console.table(userSocketIdMap)
   })
 
-  client.on('message', data=>{
+  client.on('message', data => {
     const { to, message } = JSON.parse(data)
     const toSocketId = userSocketIdMap[to]
     const toSocket = socketIdMap[toSocketId]

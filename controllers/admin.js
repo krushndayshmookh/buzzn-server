@@ -39,6 +39,8 @@ exports.users_put = async (req, res) => {
         amount: update.cash - user.cash,
         type: update.cash > user.cash ? 'admin-payment' : 'admin-payout',
       })
+
+      console.info('Transaction created:', transaction._id)
     }
     return res.send(updatedUser)
   } catch (err) {

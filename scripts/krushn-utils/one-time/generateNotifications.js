@@ -56,7 +56,7 @@ async function run() {
         trigger: 'follow',
         data: {
           user: follower.follower,
-          follower: follower._id
+          follower: follower._id,
         },
         createdAt: follower.createdAt,
       })

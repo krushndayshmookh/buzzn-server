@@ -6,9 +6,9 @@ const { Post } = require('../../../models')
 async function run() {
   try {
     const posts = await Post.find({
-      type: 'image'
+      type: 'image',
     })
-    
+
     console.info(`Found ${posts.length} posts.`)
 
     for (let i = 0; i < posts.length; i++) {

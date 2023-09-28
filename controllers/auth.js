@@ -158,8 +158,6 @@ exports.forgotPassword_post = async (req, res) => {
   try {
     const user = await User.findOne({ email }).lean()
 
-    console.log(user)
-
     if (!user) {
       return res.status(404).send({ success: false, message: 'User not found' })
     }

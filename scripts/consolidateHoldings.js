@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 const performDatabaseUpdate = require('./performDatabaseUpdate')
-const { Holding, Trade, Instrument, Post, User } = require('../models')
+const { Holding, Trade, Instrument, Post } = require('../models')
 const BLOCK_COUNTS = require('../configs/PostTypeBlockCounts')
 
 async function fixHoldings() {
@@ -38,7 +39,6 @@ async function fixHoldings() {
           0
         ) / buyQuantity
       : 0
-
 
     if (buyPrice !== holding.averagePrice) {
       console.info(
@@ -124,7 +124,9 @@ async function cleanHoldings() {
     const holding = holdings[i]
 
     if (`${holding.user._id}` === `${holding.instrument.user}`) {
-      console.info(`Deleting holding ${holding.user.username} ${holding.instrument.symbol}`)
+      console.info(
+        `Deleting holding ${holding.user.username} ${holding.instrument.symbol}`
+      )
       await holding.remove()
     }
   }

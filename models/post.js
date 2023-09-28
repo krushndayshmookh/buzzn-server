@@ -81,7 +81,7 @@ const PostSchema = new Schema(
         originalFilename: {
           type: String,
         },
-        isMuted:{
+        isMuted: {
           type: Boolean,
           default: false,
         },
@@ -98,7 +98,7 @@ const PostSchema = new Schema(
             end: {
               type: Number,
             },
-          }
+          },
         },
       },
       video: {

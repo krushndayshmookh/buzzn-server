@@ -21,11 +21,11 @@ const NotificationSchema = new Schema(
     data: {
       type: Schema.Types.Mixed,
     },
-    trigger:{
+    trigger: {
       type: String,
       required: true,
       enum: ['order', 'like', 'comment', 'follow', 'mention', 'message'],
-    }
+    },
   },
   {
     toJSON: {
