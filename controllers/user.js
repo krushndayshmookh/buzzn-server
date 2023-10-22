@@ -416,7 +416,7 @@ exports.user_instrument_get = async (req, res) => {
   try {
     const instrument = await Instrument.findOne(query).lean()
 
-    const dayStartTick = await Tick.findOne({
+    let dayStartTick = await Tick.findOne({
       instrument: instrument._id,
       timestamp: {
         $gte: moment.tz('Asia/Kolkata').startOf('day').toDate(),
@@ -425,6 +425,12 @@ exports.user_instrument_get = async (req, res) => {
       .sort({ timestamp: 1 })
       .lean()
 
+    if (!dayStartTick) {
+      dayStartTick = {
+        price: instrument.ltp,
+      }
+    }
+    
     instrument.dayStartTick = dayStartTick
     instrument.change =
       ((instrument.ltp - instrument.dayStartTick.price) * 100) /
