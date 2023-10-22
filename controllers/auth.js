@@ -25,6 +25,12 @@ const createNewUser = async userData => {
     symbol: `BLOCK-${newUser.username}`,
   })
 
+  Instrument.find({ symbol: newInstrument.symbol }).then(instrument => {
+    if (instrument.length > 0) {
+      newInstrument.symbol = `BLOCK-${newUser.username}-${instrument.length}`
+    }
+  })
+
   await newUser.save()
   await newInstrument.save()
 
