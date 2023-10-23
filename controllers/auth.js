@@ -21,7 +21,7 @@ const createNewUser = async userData => {
 
   User.find({ username: newUser.username }).then(user => {
     if (user.length > 0) {
-      newUser.username = `${newUser.username}_${user.email.length}`
+      newUser.username = `${newUser.username}_${newUser.email.length}`
     }
   })
 
