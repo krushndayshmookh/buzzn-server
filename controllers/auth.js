@@ -141,13 +141,14 @@ exports.register_post = async (req, res) => {
 
     return res.status(201).send({ success: true })
   } catch (err) {
+    console.error({ err })
+
     if (err.code === 11000) {
       return res
         .status(409)
         .send({ success: false, message: 'Email already exists' })
     }
 
-    console.error({ err })
     return res.status(500).send({ err })
   }
 }
