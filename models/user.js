@@ -102,7 +102,7 @@ const UserSchema = new Schema(
     ],
     referralCode: {
       type: String,
-      default: generate.string(6),
+      default: () => generate.string(6),
       required: true,
       unique: true,
     },
