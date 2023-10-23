@@ -19,6 +19,12 @@ const createNewUser = async userData => {
 
   const newUser = new User(userData)
 
+  User.find({ username: newUser.username }).then(user => {
+    if (user.length > 0) {
+      newUser.username = `${newUser.username}_${user.email.length}`
+    }
+  })
+
   const newInstrument = new Instrument({
     user: newUser._id,
     minted: 0,
@@ -93,7 +99,7 @@ exports.login_post = async (req, res) => {
 
       if (authProvider === 'firebase') {
         const newUser = await createNewUser({
-          username: decodedToken.name.toLowerCase().replace(' ', '-'),
+          username: decodedToken.name.toLowerCase().replace(' ', '_'),
           email: decodedToken.email,
           avatar: decodedToken.picture,
           authProvider: 'firebase',
