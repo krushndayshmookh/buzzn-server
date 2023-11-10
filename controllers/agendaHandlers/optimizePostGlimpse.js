@@ -66,7 +66,7 @@ module.exports = async job => {
       })
       .saveToFile(`/tmp/${postId}.webm`)
 
-    post.content.glimpse.content = `https://cdn.keepbuzzn.com/posts/content/${postId}.mp4`
+    post.content.glimpse.content = `https://cdn.keepbuzzn.com/posts/content/${postId}.webm`
 
     // generate thumbnail gif
     new FfmpegCommand(inVideo)
