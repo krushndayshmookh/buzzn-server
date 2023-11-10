@@ -42,6 +42,8 @@ global.io = io
 mongoose.plugin(mongoosePaginate)
 mongoose.plugin(mongooseLeanVirtuals)
 
+mongoose.set('strictQuery', false)
+
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,

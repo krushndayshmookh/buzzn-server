@@ -2,6 +2,12 @@ const router = require('express').Router()
 
 const agendaController = require('../controllers/agenda')
 
+router.post('/post/text', (req, res) => {
+  res.send({
+    success: true,
+  })
+})
+
 router.post('/post/image', agendaController.schedulePostImageProcessing)
 
 router.post('/post/audio', agendaController.schedulePostAudioProcessing)
