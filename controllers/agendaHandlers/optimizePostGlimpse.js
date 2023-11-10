@@ -37,7 +37,7 @@ module.exports = async job => {
       .inputFormat('webm')
       .setStartTime(range.start) // Can be in "HH:MM:SS" format also
       .setDuration(range.end - range.start)
-      .size('640x640')
+      .size('1024x1024')
       .format('webm')
       .audioCodec('libvorbis')
       .videoCodec('libvpx')
