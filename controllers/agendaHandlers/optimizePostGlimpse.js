@@ -39,8 +39,8 @@ module.exports = async job => {
       .setDuration(range.end - range.start)
       .size('1024x1024')
       .format('webm')
-      .audioCodec('libvorbis')
-      .videoCodec('libvpx')
+      .audioCodec('copy')
+      .videoCodec('copy')
       .on('start', commandLine => {
         console.info(`Spawned FFmpeg with command: ${commandLine}`)
       })
