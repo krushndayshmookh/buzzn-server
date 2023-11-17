@@ -3,6 +3,7 @@ const Agenda = require('agenda')
 const optimizePostImage = require('./agendaHandlers/optimizePostImage')
 const optimizePostAudio = require('./agendaHandlers/optimizePostAudio')
 const optimizePostGlimpse = require('./agendaHandlers/optimizePostGlimpse')
+const optimizePostVideo = require('./agendaHandlers/optimizePostVideo')
 
 const optimizeUserAvatar = require('./agendaHandlers/optimizeUserAvatar')
 
@@ -16,6 +17,7 @@ const jobQueue = new Agenda({
 jobQueue.define('OptimizePostImage', optimizePostImage)
 jobQueue.define('OptimizePostAudio', optimizePostAudio)
 jobQueue.define('OptimizePostGlimpse', optimizePostGlimpse)
+jobQueue.define('OptimizePostVideo', optimizePostVideo)
 
 jobQueue.define('OptimizeUserAvatar', optimizeUserAvatar)
 
@@ -60,6 +62,22 @@ exports.schedulePostGlimpseProcessing = async (req, res) => {
 
   try {
     jobQueue.now('OptimizePostGlimpse', post)
+
+    res.json({
+      success: true,
+      post,
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).send('Internal server error')
+  }
+}
+
+exports.schedulePostVideoProcessing = async (req, res) => {
+  const { post } = req.body
+
+  try {
+    jobQueue.now('OptimizePostVideo', post)
 
     res.json({
       success: true,

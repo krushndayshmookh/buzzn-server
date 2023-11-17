@@ -14,6 +14,8 @@ router.post('/post/audio', agendaController.schedulePostAudioProcessing)
 
 router.post('/post/glimpse', agendaController.schedulePostGlimpseProcessing)
 
+router.post('/post/video', agendaController.schedulePostVideoProcessing)
+
 router.post('/user/avatar', agendaController.scheduleUserAvatarProcessing)
 
 module.exports = router
