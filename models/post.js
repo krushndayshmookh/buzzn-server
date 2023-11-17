@@ -85,6 +85,9 @@ const PostSchema = new Schema(
           type: Boolean,
           default: false,
         },
+        blurry: {
+          type: String,
+        },
         processing: {
           status: {
             type: String,
@@ -105,8 +108,39 @@ const PostSchema = new Schema(
         content: {
           type: String,
         },
+        caption: {
+          type: String,
+        },
         thumbnail: {
           type: String,
+        },
+        original: {
+          type: String,
+        },
+        originalFilename: {
+          type: String,
+        },
+        isMuted: {
+          type: Boolean,
+          default: false,
+        },
+        blurry: {
+          type: String,
+        },
+        processing: {
+          status: {
+            type: String,
+            enum: ['pending', 'processing', 'complete', 'error'],
+            default: 'pending',
+          },
+          range: {
+            start: {
+              type: Number,
+            },
+            end: {
+              type: Number,
+            },
+          },
         },
       },
       audio: {
