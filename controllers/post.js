@@ -201,7 +201,7 @@ exports.create_post = async (req, res) => {
 
   const { user } = req.decoded
 
-  const blockCount = BLOCK_COUNTS[type]
+  // const blockCount = BLOCK_COUNTS[type]
 
   if (type === 'glimpse') {
     content.glimpse.processing.status = 'pending'
@@ -217,32 +217,32 @@ exports.create_post = async (req, res) => {
 
     await newPost.save()
 
-    let instrument = await Instrument.findOne({ user: user._id })
+    // let instrument = await Instrument.findOne({ user: user._id })
 
-    if (instrument) {
-      // instrument.minted += blockCount
-      instrument.fresh += blockCount
-    } else {
-      instrument = new Instrument({
-        user: user._id,
-        // minted: blockCount,
-        fresh: blockCount,
-        symbol: `BLOCK-${user.username}`,
-      })
-    }
-    await instrument.save()
+    // if (instrument) {
+    //   // instrument.minted += blockCount
+    //   instrument.fresh += blockCount
+    // } else {
+    //   instrument = new Instrument({
+    //     user: user._id,
+    //     // minted: blockCount,
+    //     fresh: blockCount,
+    //     symbol: `BLOCK-${user.username}`,
+    //   })
+    // }
+    // await instrument.save()
 
-    const blockDelta = new BlockDelta({
-      user: user._id,
-      instrument: instrument._id,
-      type: 'mint',
-      quantity: blockCount,
-      data: {
-        post: newPost._id,
-      },
-    })
+    // const blockDelta = new BlockDelta({
+    //   user: user._id,
+    //   instrument: instrument._id,
+    //   type: 'mint',
+    //   quantity: blockCount,
+    //   data: {
+    //     post: newPost._id,
+    //   },
+    // })
 
-    await blockDelta.save()
+    // await blockDelta.save()
 
     await axios
       .post(`${PROCESSING_SERVER_URL}/process/post/${type}`, {
