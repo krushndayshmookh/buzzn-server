@@ -7,8 +7,6 @@ const socketHandler = client => {
 
   client.on('login', userId => {
     userSocketIdMap[userId] = client.id
-
-    // console.table(userSocketIdMap)
   })
 
   client.on('message', data => {
@@ -25,4 +23,4 @@ const socketHandler = client => {
   })
 }
 
-module.exports = socketHandler
+module.exports = { socketHandler, socketIdMap, userSocketIdMap }

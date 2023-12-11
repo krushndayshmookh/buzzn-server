@@ -35,9 +35,9 @@ async function fixHoldings() {
     // }
     const buyPrice = buyQuantity
       ? buyTrades.reduce(
-          (acc, trade) => acc + trade.price * trade.quantity,
-          0
-        ) / buyQuantity
+        (acc, trade) => acc + trade.price * trade.quantity,
+        0
+      ) / buyQuantity
       : 0
 
     if (buyPrice !== holding.averagePrice) {

@@ -77,7 +77,7 @@ app.use(express.static(PUBLIC_DIR))
 // app.set('view engine', 'pug')
 // app.set('views', './views')
 
-io.on('connection', require('./handlers'))
+io.on('connection', require('./handlers').socketHandler)
 
 app.use('/api', require('./routes'))
 
